@@ -4,9 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>&nbsp;</title>
 <body style="width: 100%; height: 100%; margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;">
-<div id="wrapperDiv">
+<div id="wrapperDiv"></div>
 <canvas id="screenshotCanvas" style="width: 100%; height: 99.65%;"></canvas>
-</div>
+
 
 <script>
 var canvas = document.getElementById("screenshotCanvas")
@@ -82,25 +82,15 @@ window.onload = function beginCommunication() {
 			break;
         case 'S': // scroll to top command
             console.log("Received scroll command.");
+            wrapper.textContent = "";
             window.scrollTo(0, 0);
 			break;
         case 'C': // inject clickable
-        var coordinateFragments = originalMessage.split("|");
-        var location = coordinateFragments[0].split(",");
-        var dimension = coordinateFragments[1].split(",");
-        
             console.log("Received clickable.");
-            /**var ctx = canvas.getContext('2d');
-            ctx.beginPath();
-            ctx.rect(location[0], location[1], dimension[0], dimension[1]);
-            ctx.fillStyle = "red";
-            ctx.fill();
-            **/
-
+            var coordinateFragments = originalMessage.split("|");
+            var location = coordinateFragments[0].split(",");
+            var dimension = coordinateFragments[1].split(",");
             var htmlClickable = document.createElement("input");
-            //var alreadyExistingClickables = this.filterClickables(currentClickables, point);
-
-            //if (!alreadyExistingClickables || !alreadyExistingClickables.length) {
             htmlClickable.type = "button";
             htmlClickable.style.position = "absolute";
             htmlClickable.style.left = location[0] + 'px';
@@ -109,11 +99,12 @@ window.onload = function beginCommunication() {
             htmlClickable.style.height = dimension[1] + 'px';
             htmlClickable.value = "";
             htmlClickable.style.cursor = "pointer";
-            htmlClickable.style.background = "Transparent";
+            htmlClickable.style.background = "Transparent"; // red or Transparent
             htmlClickable.style.border = "none";
             htmlClickable.style.outline = "none";
+            htmlClickable.id = "PhD-FakeField";
             wrapper.appendChild(htmlClickable);
-			break;
+            break;
         }
     }
 

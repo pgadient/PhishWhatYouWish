@@ -353,12 +353,18 @@ public class BrowserController {
     }
     
     public void injectNativeControls() {
-    	List<Clickable> clickables = _parser.getClickables();
-    	for (Clickable c : clickables) {
-    		Point l = c.getLocation(); // location
-    		Dimension d = c.getDimension(); // dimension
-			ServerWebSocket.sendControlMessage("C:" + l.x + "," + l.y + "|" + d.width + "," + d.height);;
-		}
+    	Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				List<Clickable> clickables = _parser.getClickables();
+		    	for (Clickable c : clickables) {
+		    		Point l = c.getLocation(); // location
+		    		Dimension d = c.getDimension(); // dimension
+					ServerWebSocket.sendControlMessage("C:" + l.x + "," + l.y + "|" + d.width + "," + d.height);;
+				}
+			}};
+    	Thread t = new Thread(r);
+    	t.start();
     }
 
     /**
