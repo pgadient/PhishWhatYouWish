@@ -85,5 +85,4 @@ public class WebSocketControl extends WebSocketApplication {
 	public void sendControlMessage(String message) {
 		_currentSocket.send(message);
 	}
-	
 }

@@ -10,11 +10,9 @@ public class Main {
 		//TODO: Favicon support
 		//TODO: tab support
 		//TODO: multi-user support
-		//TODO: rendering textboxes/buttons/links/... locally (maybe only blinking cursor and small view updates?)
-		//TODO: filter title/path updates that do not change
+		//TODO: rendering textboxes/buttons/links/... locally
 		
 		BrowserController controller = new BrowserController("https://www.google.com/", false);
-		controller.initBrowsingInstance();
 		
 		ServerHttp.start();
 		ServerWebSocket.start(controller);

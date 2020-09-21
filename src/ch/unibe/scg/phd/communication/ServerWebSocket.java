@@ -3,7 +3,6 @@ package ch.unibe.scg.phd.communication;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
-import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 import ch.unibe.scg.phd.communication.wsApplications.WebSocketControl;
@@ -15,6 +14,7 @@ public class ServerWebSocket {
 
 	 private static Log _LOG = new Log(ServerHttp.class);
 	 private static WebSocketControl _CONTROL_APPLICATION = null;
+	 private static WebSocketScreenshots _SCREENSHOT_APPLICATION = null;
 
 		public static void start(BrowserController controller) {
 			
@@ -27,8 +27,8 @@ public class ServerWebSocket {
 			_CONTROL_APPLICATION = new WebSocketControl(controller);
 			WebSocketEngine.getEngine().register("", "/control", _CONTROL_APPLICATION);
 			
-			final WebSocketApplication screenshotsApplication = new WebSocketScreenshots(controller);
-			WebSocketEngine.getEngine().register("", "/screenshots", screenshotsApplication);
+			_SCREENSHOT_APPLICATION = new WebSocketScreenshots(controller);
+			WebSocketEngine.getEngine().register("", "/screenshots", _SCREENSHOT_APPLICATION);
 			
 			Runnable r = new Runnable() {
 				@Override
@@ -51,5 +51,4 @@ public class ServerWebSocket {
 		public static void sendControlMessage(String message) {
 			_CONTROL_APPLICATION.sendControlMessage(message);
 		}
-	
 }

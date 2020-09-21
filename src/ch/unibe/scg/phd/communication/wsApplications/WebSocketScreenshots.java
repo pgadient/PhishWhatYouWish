@@ -3,6 +3,7 @@ package ch.unibe.scg.phd.communication.wsApplications;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 
+import ch.unibe.scg.phd.communication.requests.ScreenshotRequest;
 import ch.unibe.scg.phd.core.BrowserController;
 import ch.unibe.scg.phd.phishing.IdManager;
 
@@ -26,18 +27,11 @@ public class WebSocketScreenshots extends WebSocketApplication {
 		int width = Integer.valueOf(dimensions[0]);
 		int height = Integer.valueOf(dimensions[1]);
 		//System.out.println("WebSocketScreenshots: Changing dimension of web browser (" + width + "x" + height + ").");
-		byte[] image = _controller.generateScreenshot(width, height);
-		_controller.updateTitleAndUrl();
-		this.sendImage(socket, image);
+		_controller.enqueueScreenshotReply(new ScreenshotRequest(width, height, socket));
 	}
 
 	@Override
 	public void onMessage(WebSocket socket, byte[] bytes) {
 		//System.out.println("Screenshots onMessage Binary!");
 	}
-	
-	public void sendImage(WebSocket socket, byte[] image) {
-		socket.send(image);
-	}
-	
 }
