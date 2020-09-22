@@ -39,7 +39,6 @@ public class CharUtil {
 	    		return Keys.INSERT;
 	    	case 46:
 	    		return Keys.DELETE;
-//	    		
 //	    	case 48:
 //	    		return "0";
 //	    	case 49:
@@ -60,7 +59,6 @@ public class CharUtil {
 //	    		return "8";
 //	    	case 57:
 //	    		return "9";
-//	    		
 //	    	case 65:
 //	    		return "a";
 //	    	case 66:
@@ -113,7 +111,6 @@ public class CharUtil {
 //	    		return "y";
 //	    	case 90:
 //	    		return "z";
-//	    	
 //	    	case 96:
 //	    		return Keys.NUMPAD0;
 //	    	case 97:
@@ -168,14 +165,6 @@ public class CharUtil {
 //	    		return Keys.F11;
 //	    	case 123:
 //	    		return Keys.F12;
-	    	default:
-	    		return CharBuffer.wrap(new char[]{(char) keyCode});
-	    		//return new String(new int[] {keyCode}, 0, 1); // converts remaining printable chars
-	    		
-//	    	default:
-//	    		if (keyCode >= 32) {
-//	    			return CharBuffer.wrap(new char[]{(char) keyCode});
-	    }
 			
 //	    	case "Delete":
 //	    		return Keys.DELETE;
@@ -195,8 +184,9 @@ public class CharUtil {
 //		        return Keys.BACK_SPACE;
 //		    case "Tab":
 //		        return Keys.TAB;
-//		    default:
-//		        return CharBuffer.wrap(new char[]{(char) keyCode});
+	    	default:
+	    		return CharBuffer.wrap(new char[]{(char) keyCode}); // converts remaining printable chars
+		}
 	}
 	
 }

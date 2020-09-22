@@ -1,7 +1,5 @@
 package ch.unibe.scg.phd.utils;
 
-import ch.unibe.scg.phd.data.exceptions.AttributeNotFoundException;
-
 public class HtmlElement {
     
 	private final String _content;
@@ -14,9 +12,9 @@ public class HtmlElement {
         return _content.matches("(.)*" + attributeName + "=(.)*");
     }
 
-    public String getAttributeValue(String attributeName) throws AttributeNotFoundException {
+    public String getAttributeValue(String attributeName) {
         if (!hasAttribute(attributeName)) {
-            throw new AttributeNotFoundException("Html Element" + this + "does not contain Attribute" + attributeName);
+        	return "";
         }
         int attributeStart = _content.indexOf(attributeName);
         //answer start after first = after start of the attribute name

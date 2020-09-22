@@ -1,7 +1,6 @@
 package ch.unibe.scg.phd.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.CharBuffer;
@@ -76,6 +75,7 @@ public class BrowserController {
     	System.setProperty(Configuration.FIREFOX_DRIVER, System.getProperty("user.dir") + Configuration.PATH_DRIVERS + Configuration.FIREFOX_DRIVER_WIN64);
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
+        
         if (Configuration.FEATURE_ENABLE_ADBLOCK){
             firefoxProfile.addExtension(new File(System.getProperty("user.dir") + Configuration.PATH_BROWSER_EXTENSIONS + Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS));
         }
@@ -210,14 +210,6 @@ public class BrowserController {
     	action.sendKeys(input).perform();
     }
 
-    public void closeTab() {
-        _driver.close();
-    }
-
-    public void closeBrowser() {
-        _driver.quit();
-    }
-    
     /**
      * Wait up to the moment that the Browser has finished loading a webpage,
      * Wait for document.readyState to equal "complete"
@@ -236,7 +228,6 @@ public class BrowserController {
         JavascriptExecutor js = (JavascriptExecutor) _driver;
         List<Long> windowSize = (ArrayList<Long>) js.executeScript("return [window.outerWidth - window.innerWidth, window.outerHeight - window.innerHeight];");
         return new Dimension(windowSize.get(0).intValue(), windowSize.get(1).intValue());
-        //_driver.manage().window().setSize(new Dimension(width + windowSize.get(0).intValue(), height + windowSize.get(1).intValue()));
     }
 
     /**
@@ -298,11 +289,13 @@ public class BrowserController {
         }
     }
 
-    public void updateTitleAndUrl() {
+    public void updateTitleAndUrlAndFavicon() {
+    	String url = FileUtil.getFavicon(this, _driver);
 		String title = getTitle();
 		String path = getPagePath();
 		
 		ServerWebSocket.sendControlMessage("T:" + title);
+        ServerWebSocket.sendControlMessage("F:" + url);
 		ServerWebSocket.sendControlMessage("P:" + path);
 		ServerWebSocket.sendControlMessage("S:ScrollUpCmd");
     }
@@ -332,7 +325,7 @@ public class BrowserController {
 							_clientWindowWidth = width;
 							_clientWindowHeight = height;
 							setBrowserToViewportDimension(uiChangeOccurred, width, height);
-							updateTitleAndUrl();
+							updateTitleAndUrlAndFavicon();
 							injectNativeControls();
 						}
 
@@ -395,46 +388,6 @@ public class BrowserController {
     	tInputs.start();
     }
 
-    /**
-     * downloads the original favicon and saves it in the favicons folder
-     * as identifier_step.png
-     * @param identifier the id of the user, used in the name of the favicon
-     * @param step the step of the user, used in the name of the favicon
-     * @throws IOException if the download fails
-     */
-    public void getFavicon(int identifier, int step) throws IOException {
-        FileUtil.getFavicon(this, _driver, identifier, step);
-    }
-
-//    public void switchToTab(String windowHandle) {
-//        if (!StringUtil.isEmpty(windowHandle) && !_driver.getWindowHandle().equals(windowHandle)) {
-//            _driver.switchTo().window(windowHandle);
-//        }
-//    }
-
-//    public String getCurrentTab() {
-//        return _driver.getWindowHandle();
-//    }
-
-//    public String getCurrentUrl(String windowHandle) {
-//        String handle = _driver.getWindowHandle();
-//        _driver.switchTo().window(windowHandle);
-//        String url = _driver.getCurrentUrl();
-//        _driver.switchTo().window(handle);
-//        return url;
-//    }
-
-//    public void openURL(String url) {
-//        try {
-//            String host = HttpUtil.getHost(url);
-//            String protocol = url.substring(0, url.indexOf(host));
-//            String path = url.substring(url.lastIndexOf(host) + host.length());
-//            this.openURL(protocol + host, path);
-//        } catch (MalformedURLException e) {
-//            _log.error(String.format("Can't connect to [%s], this URL is Malformed", url));
-//        }
-//    }
- 
     public void sleep(long millis) {
     	_sleeper.sleep(millis);
     }

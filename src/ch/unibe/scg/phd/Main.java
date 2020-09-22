@@ -7,10 +7,8 @@ import ch.unibe.scg.phd.core.BrowserController;
 public class Main {
 
 	public static void main(String[] args) {
-		//TODO: Favicon support
 		//TODO: tab support
 		//TODO: multi-user support
-		//TODO: rendering textboxes/buttons/... locally
 		
 		BrowserController controller = new BrowserController("https://www.google.com/", false);
 		

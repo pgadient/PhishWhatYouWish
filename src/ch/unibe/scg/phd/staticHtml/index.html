@@ -19,6 +19,17 @@ var activeDrag = false;
 
 console.log("Dimension: " + window.innerWidth + "x" + window.innerHeight);
 
+function updateFavicon(srcUrl) {
+    var link = document.createElement('link');
+    var oldLink = document.getElementById('dynamic-favicon');
+    link.id = 'dynamic-favicon';
+    link.rel = 'shortcut icon';
+    link.href = srcUrl;
+    if (oldLink) {
+        document.head.removeChild(oldLink);
+    }
+    document.head.appendChild(link);
+}
 function updateLocalView() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -153,6 +164,10 @@ window.onload = function beginCommunication() {
 
             console.log("Received input element.");
             break;
+        case 'F': // update favicon
+            console.log("Received favicon.");
+            updateFavicon(originalMessage);
+			break;
         }
     }
 

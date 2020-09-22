@@ -47,7 +47,6 @@
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/reactive-streams-1.0.3.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/reactor-core-3.3.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/reactor-netty-0.9.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/slf4j-api-1.7.30.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-api-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-api-4.0.0-alpha-6-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-chrome-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-chromium-driver-4.0.0-alpha-6.jar"/>
@@ -64,10 +63,10 @@
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-remote-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-safari-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-support-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-support-4.0.0-alpha-6-sources.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/commons-io-2.8.0.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/slf4j-nop-1.7.30.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/image4j-0.7.2.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/grizzly-http-all-3.0.0-M1.jar" sourcepath="src/ch/unibe/scg/phd/lib/generic/grizzly-http-all-3.0.0-M1-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/commons-collections4-4.4.jar" sourcepath="src/ch/unibe/scg/phd/lib/generic/commons-collections4-4.4-sources.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/slf4j-nop-1.7.30.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/slf4j-api-1.7.30.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/commons-io-2.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
