@@ -353,18 +353,41 @@ public class BrowserController {
     }
     
     public void injectNativeControls() {
-    	Runnable r = new Runnable() {
+    	Runnable rClickables = new Runnable() {
 			@Override
 			public void run() {
 				List<Clickable> clickables = _parser.getClickables();
 		    	for (Clickable c : clickables) {
 		    		Point l = c.getLocation(); // location
 		    		Dimension d = c.getDimension(); // dimension
-					ServerWebSocket.sendControlMessage("C:" + l.x + "," + l.y + "|" + d.width + "," + d.height);;
+					ServerWebSocket.sendControlMessage("C:" + l.x + "," + l.y + "|" + d.width + "," + d.height);
 				}
 			}};
-    	Thread t = new Thread(r);
-    	t.start();
+    	Thread tClickables = new Thread(rClickables);
+    	tClickables.start();
+    	
+    	Runnable rInputs = new Runnable() {
+			@Override
+			public void run() {
+				List<Textbox> textboxes = _parser.getTextboxes();
+		    	for (Textbox t : textboxes) {
+		    		Point l = t.getLocation();
+		    		Dimension d = t.getDimension();
+		    		StringBuilder tConfig = new StringBuilder();
+		    		tConfig.append(t.getBackground()).append("||");
+		    		tConfig.append(t.getPlaceholder()).append("||");
+		    		tConfig.append(t.getText()).append("||");
+		    		tConfig.append(t.getType()).append("||");
+		    		tConfig.append(t.getBorder()).append("||");
+		    		tConfig.append(t.getFont()).append("||");
+		    		tConfig.append(t.getPadding()).append("||");
+		    		tConfig.append(l.x).append(",").append(l.y).append("||");
+		    		tConfig.append(d.width).append(",").append(d.height);
+					ServerWebSocket.sendControlMessage("I:" + tConfig.toString());
+				}
+			}};
+    	Thread tInputs = new Thread(rInputs);
+    	tInputs.start();
     }
 
     /**

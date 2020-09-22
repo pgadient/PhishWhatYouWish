@@ -10,7 +10,7 @@ public class Main {
 		//TODO: Favicon support
 		//TODO: tab support
 		//TODO: multi-user support
-		//TODO: rendering textboxes/buttons/links/... locally
+		//TODO: rendering textboxes/buttons/... locally
 		
 		BrowserController controller = new BrowserController("https://www.google.com/", false);
 		

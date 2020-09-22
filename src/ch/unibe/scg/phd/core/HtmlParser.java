@@ -31,13 +31,10 @@ public class HtmlParser {
 	
 	public List<Clickable> getClickables() {
         List<Clickable> result = new ArrayList<>();
-        _log.info("Searching for Clickable Elements");
         List<WebElement> elements = filterClickableElements();
         for (WebElement element: elements) {
             Point location = element.getLocation();
             Dimension dimension = element.getSize();
-            _log.info(String.format("[%s] is at Point [%d, %d] with dimension [%d, %d]", element.getTagName(), location.x, location.y, dimension.width, dimension.height));
-
             Clickable currentClickable = new Clickable(location, dimension);
             result.add(currentClickable);
         }
@@ -46,13 +43,11 @@ public class HtmlParser {
 
     public List<Textbox> getTextboxes() {
         List<Textbox> result = new ArrayList<>();
-        _log.info("Searching for Textboxes");
         List<WebElement> elements = filterTextInputElements();
         for (WebElement element: elements) {
             //FIXME sometimes on wikipedia, the location is wrong by paddingLeft
             Point location = element.getLocation();
             Dimension dimension = element.getSize();
-            _log.info(String.format("[%s : %s] is at Point [%d, %d] with dimension [%d, %d]", element.getTagName(), element.getAttribute("type"), location.x, location.y, dimension.width, dimension.height));
             String type = element.getAttribute("type");
             String text = element.getAttribute("value");
             if (text == null) {
@@ -62,7 +57,7 @@ public class HtmlParser {
             if (placeholder == null) {
                 placeholder = "";
             }
-
+            
             String background = getBackgroundColor(element);
             Map<String, String> padding = getPadding(element);
             Map<String, String> border = getBorder(element);
@@ -75,11 +70,27 @@ public class HtmlParser {
     }
 
     private Map<String, String> getFont(WebElement element) {
+    	String style = element.getCssValue(Style.FONT_STYLE);
+    	String weight = element.getCssValue(Style.FONT_WEIGHT);
+    	String size = element.getCssValue(Style.FONT_SIZE);
         String family = element.getCssValue(Style.FONT_FAMILY);
-        String size = element.getCssValue(Style.FONT_SIZE);
-        String style = element.getCssValue(Style.FONT_STYLE);
-        String weight = element.getCssValue(Style.FONT_WEIGHT);
         String color = element.getCssValue(Style.FONT_COLOR);
+        
+
+//        font-style
+//        font-variant
+//        font-weight
+//        font-size
+//        line-height
+//        font-family
+
+        
+        
+//        StringBuilder builder = new StringBuilder();
+//        builder.append(style).append(" ");
+//        builder.append(style).append(" ");
+        
+        
         Map<String, String> font = new HashMap<>();
         font.put(Style.FONT_FAMILY, family);
         font.put(Style.FONT_SIZE, size);
@@ -125,7 +136,7 @@ public class HtmlParser {
                 background = currentElement.getCssValue("background-color");
                 currentElement = currentElement.findElement(By.xpath("./.."));
             } catch (NoSuchElementException e) {
-                _log.error("Failed to find Background color, returning white as fallback");
+                // Failed to find Background color, returning white as fallback
                 background = fallbackColor;
             }
         } while (background.endsWith("0)") && !background.equals(emptyColor));
@@ -153,7 +164,6 @@ public class HtmlParser {
                     return false;
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
-        _log.info(String.format("Found [%d] Textboxes", elements.size()));
         return elements;
     }
 

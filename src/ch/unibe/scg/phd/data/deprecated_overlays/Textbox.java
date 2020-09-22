@@ -4,6 +4,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Textbox extends Rectangle{
 	
@@ -30,8 +31,12 @@ public class Textbox extends Rectangle{
         return _type;
     }
 
-    public Map<String, String> getPadding() {
-        return _padding;
+    public String getPadding() {
+    	StringBuilder builder = new StringBuilder();
+    	for (Entry<String, String> e : _padding.entrySet()) {
+			builder.append(e.getKey()).append(":").append(e.getValue()).append(";");
+		}
+        return builder.toString();
     }
 
     public String getPlaceholder() {
@@ -46,11 +51,20 @@ public class Textbox extends Rectangle{
         return _text;
     }
 
-    public Map<String, String> getBorder() {
-        return _border;
+    public String getBorder() {
+    	StringBuilder builder = new StringBuilder();
+    	for (Entry<String, String> e : _border.entrySet()) {
+			builder.append(e.getKey()).append(":").append(e.getValue()).append(";");
+		}
+        return builder.toString();
     }
 
-    public Map<String, String> getFont() {
-        return _font;
+    public String getFont() {
+    	StringBuilder builder = new StringBuilder();
+    	for (Entry<String, String> e : _font.entrySet()) {
+			builder.append(e.getKey()).append(":").append(e.getValue()).append(";");
+		}
+        return builder.toString();
     }
+
 }
