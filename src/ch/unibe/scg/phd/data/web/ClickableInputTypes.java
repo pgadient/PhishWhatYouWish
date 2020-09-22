@@ -1,6 +1,6 @@
 package ch.unibe.scg.phd.data.web;
 
-public enum ClickableInputTypes implements InputTypes{
+public enum ClickableInputTypes {
     
 	BUTTON("button"),
     SUBMIT("submit");
@@ -11,12 +11,10 @@ public enum ClickableInputTypes implements InputTypes{
         _type = type;
     }
 
-    @Override
     public boolean equalsType(String otherType) {
         return _type.equals(otherType);
     }
 
-    @Override
     public String toString() {
         return _type;
     }

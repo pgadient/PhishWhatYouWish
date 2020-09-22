@@ -1,7 +1,7 @@
 package ch.unibe.scg.phd.core;
 
 import ch.unibe.scg.phd.io.Log;
-import ch.unibe.scg.phd.properties.Properties;
+import ch.unibe.scg.phd.properties.Configuration;
 
 public class Sleeper {
     private final Log _log = new Log(Sleeper.class);
@@ -11,7 +11,7 @@ public class Sleeper {
      * @param millis the amount of milliseconds to sleep
      */
     public void debugSleep(long millis) {
-        if (Properties.FEATURE_DEBUG_OUTPUT) {
+        if (Configuration.FEATURE_DEBUG_OUTPUT) {
             sleep(millis);
         }
     }

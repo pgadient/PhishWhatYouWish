@@ -4,7 +4,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 
 /**
- * An Object that has a 2D Position, a width and a height
+ * An object that has a 2D position, a width and a height.
  */
 public class Rectangle {
 

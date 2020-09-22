@@ -3,7 +3,7 @@ package ch.unibe.scg.phd.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.unibe.scg.phd.properties.Properties;
+import ch.unibe.scg.phd.properties.Configuration;
 
 public class Log {
     private final Logger _log;
@@ -18,7 +18,7 @@ public class Log {
      * @param message the message to be logged
      */
     public void debug(String message) {
-        if (Properties.FEATURE_DEBUG_OUTPUT) {
+        if (Configuration.FEATURE_DEBUG_OUTPUT) {
             _log.debug(message);
         }
     }

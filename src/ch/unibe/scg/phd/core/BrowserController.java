@@ -30,9 +30,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import ch.unibe.scg.phd.communication.ServerWebSocket;
 import ch.unibe.scg.phd.communication.requests.ScreenshotRequest;
 import ch.unibe.scg.phd.data.deprecated_overlays.Clickable;
-import ch.unibe.scg.phd.data.deprecated_overlays.Textbox;
+import ch.unibe.scg.phd.data.deprecated_overlays.TextBox;
 import ch.unibe.scg.phd.io.Log;
-import ch.unibe.scg.phd.properties.Properties;
+import ch.unibe.scg.phd.properties.Configuration;
 import ch.unibe.scg.phd.utils.FileUtil;
 import ch.unibe.scg.phd.utils.HtmlUtil;
 
@@ -52,7 +52,7 @@ public class BrowserController {
     private int _clientWindowHeight = 0;
     
 	public BrowserController() {
-		this(Properties.PARAM_DEFAULT_BASE_URL, true);
+		this(Configuration.PARAM_DEFAULT_BASE_URL, true);
 	}
     
     public BrowserController(String baseUrl) {
@@ -73,11 +73,11 @@ public class BrowserController {
     	initScreenshotReplyManager();
     	
     	// Firefox set up
-    	System.setProperty(Properties.FIREFOX_DRIVER, System.getProperty("user.dir") + Properties.PATH_DRIVERS + Properties.FIREFOX_DRIVER_WIN64);
+    	System.setProperty(Configuration.FIREFOX_DRIVER, System.getProperty("user.dir") + Configuration.PATH_DRIVERS + Configuration.FIREFOX_DRIVER_WIN64);
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
-        if (Properties.FEATURE_ENABLE_ADBLOCK){
-            firefoxProfile.addExtension(new File(System.getProperty("user.dir") + Properties.PATH_BROWSER_EXTENSIONS + Properties.FIREFOX_EXTENSION_ADBLOCKPLUS));
+        if (Configuration.FEATURE_ENABLE_ADBLOCK){
+            firefoxProfile.addExtension(new File(System.getProperty("user.dir") + Configuration.PATH_BROWSER_EXTENSIONS + Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS));
         }
         firefoxOptions.setProfile(firefoxProfile);
         if (headless) {
@@ -204,6 +204,11 @@ public class BrowserController {
     	Actions action = new Actions(_driver);
     	action.sendKeys(CharBuffer.wrap(new char[]{(char) charCode})).perform();
     }
+    
+    public void performStringInput(String input) {
+    	Actions action = new Actions(_driver);
+    	action.sendKeys(input).perform();
+    }
 
     public void closeTab() {
         _driver.close();
@@ -222,7 +227,7 @@ public class BrowserController {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(30));
         JavascriptExecutor js = (JavascriptExecutor)driver;
         //Wait for browser to react
-        _sleeper.sleep(Properties.PARAM_AWAIT_BROWSER_SLEEP);
+        _sleeper.sleep(Configuration.PARAM_AWAIT_BROWSER_SLEEP);
         wait.until(driver1 -> js.executeScript("return document.readyState").equals("complete"));
     }
 
@@ -369,20 +374,20 @@ public class BrowserController {
     	Runnable rInputs = new Runnable() {
 			@Override
 			public void run() {
-				List<Textbox> textboxes = _parser.getTextboxes();
-		    	for (Textbox t : textboxes) {
+				List<TextBox> textboxes = _parser.getTextboxes();
+		    	for (TextBox t : textboxes) {
 		    		Point l = t.getLocation();
 		    		Dimension d = t.getDimension();
 		    		StringBuilder tConfig = new StringBuilder();
+		    		tConfig.append(l.x).append(",").append(l.y).append("||");
+		    		tConfig.append(d.width).append(",").append(d.height).append("||");
+		    		tConfig.append(t.getType()).append("||");
 		    		tConfig.append(t.getBackground()).append("||");
 		    		tConfig.append(t.getPlaceholder()).append("||");
 		    		tConfig.append(t.getText()).append("||");
-		    		tConfig.append(t.getType()).append("||");
-		    		tConfig.append(t.getBorder()).append("||");
-		    		tConfig.append(t.getFont()).append("||");
-		    		tConfig.append(t.getPadding()).append("||");
-		    		tConfig.append(l.x).append(",").append(l.y).append("||");
-		    		tConfig.append(d.width).append(",").append(d.height);
+		    		tConfig.append(t.getBorderLeft()).append("|!|").append(t.getBorderBottom()).append("|!|").append(t.getBorderRight()).append("|!|").append(t.getBorderTop()).append("||");
+		    		tConfig.append(t.getPaddingLeft()).append("|!|").append(t.getPaddingBottom()).append("|!|").append(t.getPaddingRight()).append("|!|").append(t.getPaddingTop()).append("||");
+		    		tConfig.append(t.getFontColor()).append("|!|").append(t.getFontFamily()).append("|!|").append(t.getFontSize()).append("|!|").append(t.getFontStyle()).append("|!|").append(t.getFontWeight());
 					ServerWebSocket.sendControlMessage("I:" + tConfig.toString());
 				}
 			}};
@@ -444,7 +449,7 @@ public class BrowserController {
     	}
     }
     
-    public List<Textbox> getDrawableTextboxes() {
+    public List<TextBox> getDrawableTextboxes() {
     	return _parser.getTextboxes();
     }
 }

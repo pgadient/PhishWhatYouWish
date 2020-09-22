@@ -1,4 +1,4 @@
-package ch.unibe.scg.phd.phishing;
+package ch.unibe.scg.phd.core;
 
 import java.security.SecureRandom;
 import java.util.HashMap;

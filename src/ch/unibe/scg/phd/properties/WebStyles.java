@@ -1,6 +1,6 @@
-package ch.unibe.scg.phd.data.web;
+package ch.unibe.scg.phd.properties;
 
-public class Style {
+public class WebStyles {
 	
     public static final String FONT_FAMILY = "font-family";
     public static final String FONT_SIZE = "font-size";

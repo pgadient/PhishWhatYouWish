@@ -1,9 +1,7 @@
 package ch.unibe.scg.phd.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -14,15 +12,15 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import ch.unibe.scg.phd.data.deprecated_overlays.Clickable;
-import ch.unibe.scg.phd.data.deprecated_overlays.Textbox;
+import ch.unibe.scg.phd.data.deprecated_overlays.TextBox;
 import ch.unibe.scg.phd.data.web.ClickableInputTypes;
-import ch.unibe.scg.phd.data.web.Style;
 import ch.unibe.scg.phd.data.web.TextInputTypes;
-import ch.unibe.scg.phd.io.Log;
+import ch.unibe.scg.phd.properties.WebStyles;
 
 public class HtmlParser {
 	
-    private Log _log = new Log(HtmlParser.class);
+	//private Log _log = new Log(HtmlParser.class);
+    
     private WebDriver _driver;
 	
 	public HtmlParser(WebDriver driver) {
@@ -41,89 +39,48 @@ public class HtmlParser {
         return result;
     }
 
-    public List<Textbox> getTextboxes() {
-        List<Textbox> result = new ArrayList<>();
+    public List<TextBox> getTextboxes() {
+        List<TextBox> result = new ArrayList<>();
         List<WebElement> elements = filterTextInputElements();
         for (WebElement element: elements) {
-            //FIXME sometimes on wikipedia, the location is wrong by paddingLeft
             Point location = element.getLocation();
             Dimension dimension = element.getSize();
-            String type = element.getAttribute("type");
+
+            TextBox t = new TextBox(location, dimension);
+            t.setFontStyle(element.getCssValue(WebStyles.FONT_STYLE));
+            t.setFontWeight(element.getCssValue(WebStyles.FONT_WEIGHT));
+            t.setFontSize(element.getCssValue(WebStyles.FONT_SIZE));
+            t.setFontFamily(element.getCssValue(WebStyles.FONT_FAMILY));
+            t.setFontColor(element.getCssValue(WebStyles.FONT_COLOR));
+            
+            t.setBorderLeft(element.getCssValue(WebStyles.BORDER_LEFT_WIDTH));
+            t.setBorderRight(element.getCssValue(WebStyles.BORDER_RIGHT_WIDTH));
+            t.setBorderTop(element.getCssValue(WebStyles.BORDER_TOP_WIDTH));
+            t.setBorderBottom(element.getCssValue(WebStyles.BORDER_BOTTOM_WIDTH));
+            
+            t.setPaddingLeft(element.getCssValue(WebStyles.PADDING_LEFT));
+            t.setPaddingRight(element.getCssValue(WebStyles.PADDING_RIGHT));
+            t.setPaddingTop(element.getCssValue(WebStyles.PADDING_TOP));
+            t.setPaddingBottom(element.getCssValue(WebStyles.PADDING_BOTTOM));
+            
+            t.setBackground(getBackgroundColor(element));
+            t.setType(element.getAttribute("type"));
+            
             String text = element.getAttribute("value");
             if (text == null) {
                 text = "";
             }
+            t.setText(text);
+            
             String placeholder = element.getAttribute("placeholder");
             if (placeholder == null) {
                 placeholder = "";
             }
+            t.setPlaceholder(placeholder);
             
-            String background = getBackgroundColor(element);
-            Map<String, String> padding = getPadding(element);
-            Map<String, String> border = getBorder(element);
-            Map<String, String> font = getFont(element);
-
-            Textbox currentTextbox = new Textbox(location, dimension, type, padding, placeholder, background, text, border, font);
-            result.add(currentTextbox);
+            result.add(t);
         }
         return result;
-    }
-
-    private Map<String, String> getFont(WebElement element) {
-    	String style = element.getCssValue(Style.FONT_STYLE);
-    	String weight = element.getCssValue(Style.FONT_WEIGHT);
-    	String size = element.getCssValue(Style.FONT_SIZE);
-        String family = element.getCssValue(Style.FONT_FAMILY);
-        String color = element.getCssValue(Style.FONT_COLOR);
-        
-
-//        font-style
-//        font-variant
-//        font-weight
-//        font-size
-//        line-height
-//        font-family
-
-        
-        
-//        StringBuilder builder = new StringBuilder();
-//        builder.append(style).append(" ");
-//        builder.append(style).append(" ");
-        
-        
-        Map<String, String> font = new HashMap<>();
-        font.put(Style.FONT_FAMILY, family);
-        font.put(Style.FONT_SIZE, size);
-        font.put(Style.FONT_STYLE, style);
-        font.put(Style.FONT_WEIGHT, weight);
-        font.put(Style.FONT_COLOR, color);
-        return font;
-    }
-
-    private Map<String, String> getBorder(WebElement element) {
-        String borderLeft = element.getCssValue(Style.BORDER_LEFT_WIDTH);
-        String borderRight = element.getCssValue(Style.BORDER_RIGHT_WIDTH);
-        String borderTop = element.getCssValue(Style.BORDER_TOP_WIDTH);
-        String borderBottom = element.getCssValue(Style.BORDER_BOTTOM_WIDTH);
-        Map<String, String> border = new HashMap<>();
-        border.put(Style.BORDER_LEFT, borderLeft);
-        border.put(Style.BORDER_RIGHT, borderRight);
-        border.put(Style.BORDER_TOP, borderTop);
-        border.put(Style.BORDER_BOTTOM, borderBottom);
-        return border;
-    }
-
-    private Map<String, String> getPadding(WebElement element) {
-        String paddingLeft = element.getCssValue(Style.PADDING_LEFT);
-        String paddingRight = element.getCssValue(Style.PADDING_RIGHT);
-        String paddingTop = element.getCssValue(Style.PADDING_TOP);
-        String paddingBottom = element.getCssValue(Style.PADDING_BOTTOM);
-        Map<String, String> padding = new HashMap<>();
-        padding.put(Style.PADDING_LEFT, paddingLeft);
-        padding.put(Style.PADDING_RIGHT, paddingRight);
-        padding.put(Style.PADDING_TOP, paddingTop);
-        padding.put(Style.PADDING_BOTTOM, paddingBottom);
-        return padding;
     }
 
     private String getBackgroundColor(WebElement element) {
@@ -136,7 +93,7 @@ public class HtmlParser {
                 background = currentElement.getCssValue("background-color");
                 currentElement = currentElement.findElement(By.xpath("./.."));
             } catch (NoSuchElementException e) {
-                // Failed to find Background color, returning white as fallback
+                // failed to find background color, returning white as fallback
                 background = fallbackColor;
             }
         } while (background.endsWith("0)") && !background.equals(emptyColor));
@@ -201,7 +158,7 @@ public class HtmlParser {
         elements.addAll(buttons);
         elements.addAll(inputElements);
 
-        _log.info(String.format("Found [%d] Clickables", inputElements.size()));
+        //_log.info(String.format("Found [%d] Clickables", inputElements.size()));
         return elements;
     }
 }

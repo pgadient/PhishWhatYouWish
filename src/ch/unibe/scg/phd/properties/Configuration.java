@@ -1,6 +1,6 @@
 package ch.unibe.scg.phd.properties;
 
-public class Properties {
+public class Configuration {
 
 	public static final String PATH_STATIC_HTML = "/src/ch/unibe/scg/phd/staticHtml/";
 	public static final String PATH_STATIC_HTML_INDEX = "index.html";

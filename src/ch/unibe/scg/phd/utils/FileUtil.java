@@ -7,7 +7,7 @@ import org.openqa.selenium.WebDriver;
 
 import ch.unibe.scg.phd.core.BrowserController;
 import ch.unibe.scg.phd.io.Log;
-import ch.unibe.scg.phd.properties.Properties;
+import ch.unibe.scg.phd.properties.Configuration;
 import net.sf.image4j.codec.ico.ICODecoder;
 
 import javax.imageio.ImageIO;
@@ -131,7 +131,7 @@ public class FileUtil {
             if (image == null) {
                 throw new IOException("after reading image image is null");
             }
-            ImageIO.write(image, "PNG", new File(Properties.PARAM_FAVICONS_BASE_PATH + localPath));
+            ImageIO.write(image, "PNG", new File(Configuration.PARAM_FAVICONS_BASE_PATH + localPath));
         } catch (IOException e) {
             _LOG.error("Downloading Favicon Failed with an exception");
             throw e;

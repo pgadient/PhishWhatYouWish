@@ -73,6 +73,10 @@ public class WebSocketControl extends WebSocketApplication {
 			System.out.println("Received mouse up: " + x + "," + y);
 			_controller.performMouseUp(x, y);
 			break;
+		case 'P': // copy paste input
+			System.out.println("Received copy paste event.");
+			_controller.performStringInput(originalMessage);
+			break;
 		}
 		
 	}

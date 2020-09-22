@@ -1,6 +1,6 @@
 package ch.unibe.scg.phd.data.web;
 
-public enum TextInputTypes implements InputTypes{
+public enum TextInputTypes {
     
 	TEXT("text"),
     PASSWORD("password"),
@@ -15,12 +15,10 @@ public enum TextInputTypes implements InputTypes{
         _type = type;
     }
 
-    @Override
     public boolean equalsType(String otherType) {
         return _type.equals(otherType);
     }
 
-    @Override
     public String toString() {
         return _type;
     }
