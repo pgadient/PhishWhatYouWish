@@ -8,7 +8,6 @@ import org.openqa.selenium.WebDriver;
 import ch.unibe.scg.phd.core.BrowserController;
 import ch.unibe.scg.phd.io.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -16,8 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileUtil {
-	public static File temp;
-	
     private static final Log _LOG = new Log(FileUtil.class);
 
     public static byte[] getFileContent(InputStream in) {
