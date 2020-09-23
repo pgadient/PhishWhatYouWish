@@ -72,7 +72,7 @@ public class BrowserController {
     	initScreenshotReplyManager();
     	
     	// Firefox set up
-    	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(Configuration.FIREFOX_DRIVER_WIN64));
+    	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver()));
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
         

@@ -23,6 +23,38 @@ import java.nio.file.Paths;
 public class FileUtil {
     private static final Log _LOG = new Log(FileUtil.class);
     
+    private static String getOsType() {
+    	String name = System.getProperty("os.name");
+    	String bitness = System.getProperty("os.arch");
+    	
+    	if (name.toLowerCase().contains("windows")) {
+    		// Snippet from Stack Overflow:
+    		// https://stackoverflow.com/questions/4748673/how-can-i-check-the-bitness-of-my-os-using-java-j2se-not-os-arch#5940770
+    		String arch = System.getenv("PROCESSOR_ARCHITECTURE");
+        	String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
+        	int realBitness = arch != null && arch.endsWith("64") || wow64Arch != null && wow64Arch.endsWith("64") ? 64 : 32;
+        	if (realBitness == 64) {
+        		System.out.println("FileUtil: Detected Windows x64 OS.");
+        		return "Windows64";
+        	} else {
+        		System.out.println("FileUtil: Detected Windows x86 OS.");
+        		return "Windows32";
+        	}
+    	} else if (name.toLowerCase().contains("nux")) {
+    		if (bitness.contains("64")) {
+    			System.out.println("FileUtil: Detected Linux x64 OS.");
+        		return "Linux64";
+        	} else {
+        		System.out.println("FileUtil: Detected Linux x86 OS.");
+        		return "Linux32";
+        	}
+    	} else {
+			System.out.println("FileUtil: Detected macOS.");
+    		return "macOS";
+    	}
+    }
+    
+    
 	/**
 	 * Returns if the application is started from a runnable JAR or via class files.
 	 * 
@@ -95,24 +127,32 @@ public class FileUtil {
     }
 
     public static void prepareJarTempFolder() {
-    	if (isStartedAsJAR()) {
+    	boolean jarRun = isStartedAsJAR();
+    	
+    	if (jarRun) {
+    		System.out.println("FileUtil: Application started from JAR file.");
+    	} else {
+    		System.out.println("FileUtil: Application started from source code.");
+    	}
+    	
+    	if (jarRun) {
     		File f1 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/extensions");
 	    	File f2 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/webdrivers");
 	    	File f3 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/wwwroot");
 	    	f1.mkdirs();
 	    	f2.mkdirs();
 	    	f3.mkdirs();
-	    	System.out.println(System.getProperty("FileUtil: Created temp folders."));
+	    	System.out.println("FileUtil: Created temp folders.");
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN64);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN32);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN64);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN32);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_MACOS);
-	    	System.out.println(System.getProperty("FileUtil: Extracted webdriver files."));
+	    	System.out.println("FileUtil: Extracted webdriver files.");
 	    	copyFile(Configuration.PATH_BROWSER_EXTENSIONS, "/PhishingOnDemand/extensions/", Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS);
-	    	System.out.println(System.getProperty("FileUtil: Extracted browser extensions."));
+	    	System.out.println("FileUtil: Extracted browser extensions.");
 	    	copyFile(Configuration.PATH_STATIC_HTML, "/PhishingOnDemand/wwwroot/", Configuration.PATH_STATIC_HTML_INDEX);
-	    	System.out.println(System.getProperty("FileUtil: Extracted static HTML content."));
+	    	System.out.println("FileUtil: Extracted static HTML content.");
     	}
     }
     
@@ -171,5 +211,25 @@ public class FileUtil {
     	} else {
     		return System.getProperty("user.dir") + "/src" + Configuration.PATH_STATIC_HTML;
     	}
+    }
+    
+    public static String getAppropriateDriver() {
+    	String osName = getOsType();
+    	switch (osName) {
+    	case "Windows64":
+    		return Configuration.FIREFOX_DRIVER_WIN64;
+    	case "Windows32":
+    		return Configuration.FIREFOX_DRIVER_WIN32;
+    	case "Linux64":
+    		return Configuration.FIREFOX_DRIVER_LIN64;
+    	case "Linux32":
+    		return Configuration.FIREFOX_DRIVER_LIN32;
+    	case "macOS":
+    		return Configuration.FIREFOX_DRIVER_MACOS;
+    	default:
+    		// we assume that linux distributions with flawed identifiers exist
+    		return Configuration.FIREFOX_DRIVER_LIN32;
+    	}
+    	
     }
 }

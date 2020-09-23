@@ -82,9 +82,7 @@ public class WebSocketControl extends WebSocketApplication {
 	}
 
 	@Override
-	public void onMessage(WebSocket socket, byte[] bytes) {
-		//System.out.println("Control onMessage Binary!");
-	}
+	public void onMessage(WebSocket socket, byte[] bytes) { }
 	
 	public void sendControlMessage(String message) {
 		_currentSocket.send(message);

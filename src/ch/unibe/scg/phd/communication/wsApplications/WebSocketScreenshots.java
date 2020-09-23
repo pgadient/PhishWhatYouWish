@@ -26,12 +26,10 @@ public class WebSocketScreenshots extends WebSocketApplication {
 		String[] dimensions = text.split("x");
 		int width = Integer.valueOf(dimensions[0]);
 		int height = Integer.valueOf(dimensions[1]);
-		//System.out.println("WebSocketScreenshots: Changing dimension of web browser (" + width + "x" + height + ").");
 		_controller.enqueueScreenshotReply(new ScreenshotRequest(width, height, socket));
 	}
 
 	@Override
-	public void onMessage(WebSocket socket, byte[] bytes) {
-		//System.out.println("Screenshots onMessage Binary!");
-	}
+	public void onMessage(WebSocket socket, byte[] bytes) { }
+	
 }

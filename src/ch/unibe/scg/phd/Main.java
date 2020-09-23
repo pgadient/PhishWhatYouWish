@@ -10,8 +10,7 @@ public class Main {
 	public static void main(String[] args) {
 		//TODO: tab support
 		//TODO: multi-user support
-		
-		//System.out.println(FileUtil.getFilePath("/ch/unibe/scg/phd/webdrivers/geckodriver-v0.27.0-win64.exe"));
+		//TODO: webdriver.exe remains running after exit (at least on Windows x64)
 		FileUtil.prepareJarTempFolder();
 		BrowserController controller = new BrowserController("https://www.google.com/", false);
 		
