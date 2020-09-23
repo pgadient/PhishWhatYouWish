@@ -204,6 +204,14 @@ window.onload = function beginCommunication() {
         // this listener forwards major control key codes to the server
         var keyCode = event.keyCode;
         //console.log("KeyDown: " + keyCode);
+
+        // F8 restarts the server's headless browser
+        if (keyCode == 119) {
+            event.stopPropagation();
+            socketC.send("R: Restart.");
+            console.log("Sent restart request.");
+        }
+
         if (keyCode == 8 || keyCode == 9 || keyCode == 13 || keyCode == 27 || keyCode == 33 || keyCode == 34 || keyCode == 35 || keyCode == 36 || keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40 || keyCode == 45 || keyCode == 46) { // these are control chars
             //event.preventDefault();
             event.stopPropagation();

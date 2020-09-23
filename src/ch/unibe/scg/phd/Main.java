@@ -19,6 +19,8 @@ public class Main {
 		//TODO: webdriver.exe remains running after exit (at least on Windows x64)
 		//TODO: browser height bug fix
 		//TODO: textbox alignment bug fix
+		//TODO: forward / backward key support
+		//TODO: reinit with certain key
 		if (args.length != 4) {
 			System.out.println("Main: Wrong argument count. Note: URL needs http/https protocol prefix.");
 			System.out.println("Main: Using default configuration. See examples below.");

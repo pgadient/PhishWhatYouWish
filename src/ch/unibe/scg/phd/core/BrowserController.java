@@ -49,6 +49,7 @@ public class BrowserController {
     private CircularFifoQueue<ScreenshotRequest> _screenshotRequestBuffer = new CircularFifoQueue<>(1);
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
+    private FirefoxOptions _ffOptions;
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
     	// stripping leading and trailing dashes from URL
@@ -65,27 +66,36 @@ public class BrowserController {
     	
     	// Firefox set up
     	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver()));
-        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        _ffOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
         
         if (adblock){
             firefoxProfile.addExtension(new File(FileUtil.getFullyQualifiedExtensionsPath(Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS)));
         }
-        firefoxOptions.setProfile(firefoxProfile);
+        _ffOptions.setProfile(firefoxProfile);
         if (headless) {
             FirefoxBinary firefoxBinary = new FirefoxBinary();
             firefoxBinary.addCommandLineOptions("--headless");
-            firefoxOptions.setBinary(firefoxBinary);
+            _ffOptions.setBinary(firefoxBinary);
         }
         
-        _driver = new FirefoxDriver(firefoxOptions);
-        _parser = new HtmlParser(_driver);
+        initBrowser();
+    }
+	
+    public void initBrowser() {
+    	_driver = new FirefoxDriver(_ffOptions);
+    	_parser = new HtmlParser(_driver);
         _uiSpacing = getBrowserUiSpacing();
         System.out.println("UI spacing is: " + _uiSpacing.width + "x" + _uiSpacing.height);
         _driver.manage().window().maximize();
         this.openURL(_baseUrl);
     }
-	
+    
+    public void restartHeadlessBrowser() {
+    	_driver.quit();
+    	initBrowser();
+    }
+    
     public void navigateForward() {
     	_driver.navigate().forward();
     }

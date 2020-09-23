@@ -77,6 +77,10 @@ public class WebSocketControl extends WebSocketApplication {
 			System.out.println("Received copy paste event.");
 			_controller.performStringInput(originalMessage);
 			break;
+		case 'R': // restart browser
+			System.out.println("Received restart event.");
+			_controller.restartHeadlessBrowser();
+			break;
 		}
 		
 	}
