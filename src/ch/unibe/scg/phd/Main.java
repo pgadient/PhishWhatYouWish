@@ -18,7 +18,7 @@ import ch.unibe.scg.phd.io.SeleniumLog;
 import ch.unibe.scg.phd.utils.FileUtil;
 
 public class Main {
-	private static Logger _LOG = LoggerFactory.getLogger(Main.class);
+	private static Logger _LOG;
 	private static boolean _FEATURE_DEBUG_OUTPUT = true;
 	private static boolean _FEATURE_ENABLE_ADBLOCK = true;
 	private static boolean _FEATURE_HEADLESS = false;
@@ -40,13 +40,16 @@ public class Main {
 		}
 		
 		initLogger();
+		// Logger must not be initialized before Logger setup is completed.
+		// Otherwise, strange configuration inconsistency issues show up.
+		 _LOG = LoggerFactory.getLogger(Main.class);
 		SeleniumLog.initWorkerThread();		
 		
 		if (args.length != 4) {
-			_LOG.info("Wrong argument count. Note: URL needs http/https protocol prefix.");
-			_LOG.info("Using default configuration. See examples below.");
-			_LOG.info("java -jar PhD.jar [headless] [adblock] [debug output] [landing page URL]");
-			_LOG.info("java -jar PhD.jar true true false \"https://www.google.com\"");
+			_LOG.warn("Wrong argument count. Note: URL needs http/https protocol prefix.");
+			_LOG.warn("Using default configuration. See examples below.");
+			_LOG.warn("java -jar PhD.jar [headless] [adblock] [debug output] [landing page URL]");
+			_LOG.warn("java -jar PhD.jar true true false \"https://www.google.com\"");
 		}
 		
 		printCurrentConfiguration();
@@ -79,33 +82,28 @@ public class Main {
 		}
 		
 		featureState.append("baseUrl: " + _PARAM_DEFAULT_BASE_URL);
-		_LOG.info(featureState.toString());
+		_LOG.warn(featureState.toString());
 	}
 
 	private static void initLogger() {
 		ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
 		builder.setConfigurationName("defaultConfiguration");
 		
+		Level chosenLevel;
 		if (_FEATURE_DEBUG_OUTPUT) {
-			builder.setStatusLevel(Level.INFO);
+			chosenLevel = Level.WARN;
 		} else {
-			builder.setStatusLevel(Level.WARN);
+			chosenLevel = Level.ERROR;
 		}
+		builder.setStatusLevel(chosenLevel);
 		
 		AppenderComponentBuilder appenderBuilder = builder.newAppender("Stdout", "CONSOLE").addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-		appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%d %-10t %-5level %msg%n%throwable"));
+		appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%d %-10.10t %-5level %msg%n%throwable"));
 		builder.add(appenderBuilder);
-		builder.add(builder.newRootLogger(Level.DEBUG).add(builder.newAppenderRef("Stdout")));
+		builder.add(builder.newRootLogger(chosenLevel).add(builder.newAppenderRef("Stdout")));
 		
 		_configuration = builder.build();
 		Configurator.initialize(_configuration);
-		
-//		reinitLogger();
-	}
-	
-	public static void reinitLogger() {
-		Configurator.reconfigure(_configuration);
-		Configurator.setRootLevel(Level.INFO);
 	}
 	
 }

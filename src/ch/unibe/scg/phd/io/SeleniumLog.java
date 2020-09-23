@@ -10,13 +10,10 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.unibe.scg.phd.Main;
-
 public class SeleniumLog {
 	
 	private static Logger _LOG = LoggerFactory.getLogger(SeleniumLog.class);
 	private static ByteArrayOutputStream _BAOS = new ByteArrayOutputStream();
-	private static boolean _NEEDS_REINIT = true; 
 	
 	public static void initWorkerThread() {
 		System.setErr(new PrintStream(_BAOS));
@@ -31,24 +28,20 @@ public class SeleniumLog {
 						while (br.ready()) {
 							String currentLine = br.readLine();
 							if (!currentLine.equals("")) {
-//								if (_NEEDS_REINIT) {
-//									Main.reinitLogger();
-//									_NEEDS_REINIT = false;
-//								}
-//								String currentLineLower = currentLine.toLowerCase();
-//								if (currentLineLower.contains("trace")) {
-//									_LOG.trace(currentLine);
-//								} else if (currentLineLower.contains("debug")) {
-//									_LOG.debug(currentLine);
-//								} else if (currentLineLower.contains("info")) {
-//									_LOG.info(currentLine);
-//								} else if (currentLineLower.contains("warn")) {
-//									_LOG.warn(currentLine);
-//								} else if (currentLineLower.contains("error")) {
+								String currentLineLower = currentLine.toLowerCase();
+								if (currentLineLower.contains("trace")) {
+									_LOG.trace(currentLine);
+								} else if (currentLineLower.contains("debug")) {
+									_LOG.debug(currentLine);
+								} else if (currentLineLower.contains("info")) {
+									_LOG.info(currentLine);
+								} else if (currentLineLower.contains("warn")) {
+									_LOG.warn(currentLine);
+								} else if (currentLineLower.contains("error")) {
 									_LOG.error(currentLine);
-//								} else {
-//									_LOG.info(currentLine);
-//								}
+								} else {
+									_LOG.warn(currentLine);
+								}
 							}
 						}
 					} catch (IOException e1) {

@@ -36,7 +36,7 @@ public class ServerWebSocket {
 			public void run() {
 				try {
 					server.start();
-					_LOG.info("WebSocket server online.");
+					_LOG.warn("WebSocket server online.");
 					while (true) {
 						Thread.currentThread().join();
 						_LOG.error("Thread finished join of himself (should never happen).");

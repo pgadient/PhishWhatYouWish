@@ -337,7 +337,7 @@ public class BrowserController {
 						socket.send(image);
 						
 						if (_screenshotRequestBuffer.size() > 0) {
-							_LOG.info("Currently queued screenshots: " + _screenshotRequestBuffer.size());
+							_LOG.warn("Currently queued screenshots: " + _screenshotRequestBuffer.size());
 						}
 						
 					} catch (Exception e) {
