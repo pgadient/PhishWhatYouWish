@@ -13,7 +13,6 @@ import java.util.List;
 
 
 public class HtmlUtil {
-//    private static final Log _LOG = new Log(HtmlUtil.class);
     private static final String _HTTP = "http://";
     private static final String _HTTPS = "https://";
 

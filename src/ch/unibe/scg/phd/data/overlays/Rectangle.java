@@ -1,4 +1,4 @@
-package ch.unibe.scg.phd.data.deprecated_overlays;
+package ch.unibe.scg.phd.data.overlays;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;

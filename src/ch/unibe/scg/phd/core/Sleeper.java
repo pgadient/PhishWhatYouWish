@@ -1,9 +1,11 @@
 package ch.unibe.scg.phd.core;
 
-import ch.unibe.scg.phd.io.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Sleeper {
-    private final Log _log = new Log(Sleeper.class);
+	
+	private static Logger _LOG = LoggerFactory.getLogger(Sleeper.class);
 
     /**
      * Sleep no mather in which mode application runs
@@ -13,7 +15,8 @@ public class Sleeper {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            _log.error(String.format("Failed to sleep for [%d] ms", millis), e);
+            _LOG.error("Failed to sleep for " + millis + " ms");
         }
     }
+    
 }

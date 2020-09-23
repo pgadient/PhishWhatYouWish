@@ -25,18 +25,20 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.unibe.scg.phd.communication.ServerWebSocket;
 import ch.unibe.scg.phd.communication.requests.ScreenshotRequest;
-import ch.unibe.scg.phd.data.deprecated_overlays.Clickable;
-import ch.unibe.scg.phd.data.deprecated_overlays.TextBox;
-import ch.unibe.scg.phd.io.Log;
+import ch.unibe.scg.phd.data.overlays.Clickable;
+import ch.unibe.scg.phd.data.overlays.TextBox;
 import ch.unibe.scg.phd.properties.Configuration;
 import ch.unibe.scg.phd.utils.FileUtil;
 import ch.unibe.scg.phd.utils.HtmlUtil;
 
 public class BrowserController {
 	
+	private static Logger _LOG = LoggerFactory.getLogger(BrowserController.class);
 	private String _url = "";
 	private final Object _lock = new Object();
     public final String[] _faviconRel = {"icon", "shortcut icon"};
@@ -44,7 +46,6 @@ public class BrowserController {
     private Sleeper _sleeper;
     private WebDriver _driver;
     final private String _baseUrl;
-    private Log _log = new Log(BrowserController.class);
     private Dimension _uiSpacing;
     private CircularFifoQueue<ScreenshotRequest> _screenshotRequestBuffer = new CircularFifoQueue<>(1);
     private int _clientWindowWidth = 0;
@@ -77,6 +78,7 @@ public class BrowserController {
             FirefoxBinary firefoxBinary = new FirefoxBinary();
             firefoxBinary.addCommandLineOptions("--headless");
             _ffOptions.setBinary(firefoxBinary);
+            firefoxBinary.addCommandLineOptions("--log-level=1");
         }
         
         initBrowser();
@@ -86,7 +88,7 @@ public class BrowserController {
     	_driver = new FirefoxDriver(_ffOptions);
     	_parser = new HtmlParser(_driver);
         _uiSpacing = getBrowserUiSpacing();
-        System.out.println("UI spacing is: " + _uiSpacing.width + "x" + _uiSpacing.height);
+        _LOG.info("UI spacing is: " + _uiSpacing.width + "x" + _uiSpacing.height);
         _driver.manage().window().maximize();
         this.openURL(_baseUrl);
     }
@@ -286,7 +288,7 @@ public class BrowserController {
             }
             return path + "?" + query;
         } catch (MalformedURLException e) {
-            _log.error(String.format("Failed to create URL Object from current url string [%s]", current));
+            _LOG.warn("Failed to create URL Object from current url string " + current);
             return "/";
         }
     }
@@ -322,7 +324,7 @@ public class BrowserController {
 						
 						boolean urlChangeOccurred = urlHasChanged();
 						boolean uiChangeOccurred = ((width != _clientWindowWidth) || (height != _clientWindowHeight));
-						//System.out.println("url/ui: " + urlChangeOccurred + " / " + uiChangeOccurred);
+						_LOG.debug("url/ui: " + urlChangeOccurred + " / " + uiChangeOccurred);
 						if (urlChangeOccurred || uiChangeOccurred) {
 							_clientWindowWidth = width;
 							_clientWindowHeight = height;
@@ -335,7 +337,7 @@ public class BrowserController {
 						socket.send(image);
 						
 						if (_screenshotRequestBuffer.size() > 0) {
-							System.out.println("Currently queued screenshots: " + _screenshotRequestBuffer.size());
+							_LOG.info("Currently queued screenshots: " + _screenshotRequestBuffer.size());
 						}
 						
 					} catch (Exception e) {

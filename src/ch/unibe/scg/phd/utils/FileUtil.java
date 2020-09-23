@@ -4,9 +4,10 @@ import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.unibe.scg.phd.core.BrowserController;
-import ch.unibe.scg.phd.io.Log;
 import ch.unibe.scg.phd.properties.Configuration;
 
 import java.io.File;
@@ -21,7 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileUtil {
-    private static final Log _LOG = new Log(FileUtil.class);
+	private static Logger _LOG = LoggerFactory.getLogger(FileUtil.class);
     private static String _OSTYPE;
     private static boolean _STARTED_AS_JAR;
     
@@ -41,26 +42,26 @@ public class FileUtil {
         	String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
         	int realBitness = arch != null && arch.endsWith("64") || wow64Arch != null && wow64Arch.endsWith("64") ? 64 : 32;
         	if (realBitness == 64) {
-        		System.out.println("FileUtil: Detected Windows x64 OS.");
+        		_LOG.info("Detected Windows x64 OS.");
         		_OSTYPE = "Windows64";
         		return "Windows64";
         	} else {
-        		System.out.println("FileUtil: Detected Windows x86 OS.");
+        		_LOG.info("Detected Windows x86 OS.");
         		_OSTYPE = "Windows32";
         		return "Windows32";
         	}
     	} else if (name.toLowerCase().contains("nux")) {
     		if (bitness.contains("64")) {
-    			System.out.println("FileUtil: Detected Linux x64 OS.");
+    			_LOG.info("Detected Linux x64 OS.");
     			_OSTYPE = "Linux64";
         		return "Linux64";
         	} else {
-        		System.out.println("FileUtil: Detected Linux x86 OS.");
+        		_LOG.info("Detected Linux x86 OS.");
         		_OSTYPE = "Linux32";
         		return "Linux32";
         	}
     	} else {
-			System.out.println("FileUtil: Detected macOS.");
+    		_LOG.info("Detected macOS.");
 			_OSTYPE = "macOS";
     		return "macOS";
     	}
@@ -147,9 +148,9 @@ public class FileUtil {
 
     public static void prepareJarTempFolder() {
     	if (_STARTED_AS_JAR) {
-    		System.out.println("FileUtil: Application started from JAR file.");
+    		_LOG.info("Application started from JAR file.");
     	} else {
-    		System.out.println("FileUtil: Application started from source code.");
+    		_LOG.info("Application started from source code.");
     	}
     	
     	if (_STARTED_AS_JAR) {
@@ -159,17 +160,17 @@ public class FileUtil {
 	    	f1.mkdirs();
 	    	f2.mkdirs();
 	    	f3.mkdirs();
-	    	System.out.println("FileUtil: Created temp folders.");
+	    	_LOG.info("Created temp folders.");
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN64, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN32, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN64, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN32, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_MACOS, true);
-	    	System.out.println("FileUtil: Extracted webdriver files.");
+	    	_LOG.info("Extracted webdriver files.");
 	    	copyFile(Configuration.PATH_BROWSER_EXTENSIONS, "/PhishingOnDemand/extensions/", Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS, false);
-	    	System.out.println("FileUtil: Extracted browser extensions.");
+	    	_LOG.info("Extracted browser extensions.");
 	    	copyFile(Configuration.PATH_STATIC_HTML, "/PhishingOnDemand/wwwroot/", Configuration.PATH_STATIC_HTML_INDEX, false);
-	    	System.out.println("FileUtil: Extracted static HTML content.");
+	    	_LOG.info("Extracted static HTML content.");
     	}
     }
     
@@ -200,8 +201,7 @@ public class FileUtil {
             String source = driver.getPageSource();
             return HtmlUtil.getLinkToFavicon(controller, source, driver.getCurrentUrl());
         } catch (MalformedURLException e) {
-            _LOG.error("Failed to get favicon, a MalformedURLException occured");
-            e.printStackTrace();
+            _LOG.warn("Failed to get favicon from " + driver.getCurrentUrl());
         }
 		return "";
     }

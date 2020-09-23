@@ -24,19 +24,4 @@ public class Configuration {
     public static final String PARAM_FAVICONS_BASE_PATH_DEFAULT = "./favicons/default/";
     public static final String PARAM_FAVICON_NAME = "favicon.png";
 	
-//	# Define the file appender
-//	log4j.appender.FileAppender=org.apache.log4j.RollingFileAppender
-//	log4j.appender.FileAppender.File=output.log
-//	log4j.appender.FileAppender.layout = org.apache.log4j.PatternLayout
-//	log4j.appender.FileAppender.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
-//
-//	# Define the console appender
-//	log4j.appender.Console=org.apache.log4j.ConsoleAppender
-//	log4j.appender.Console.layout = org.apache.log4j.PatternLayout
-//	log4j.appender.Console.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
-//
-//	log4j.category.ch.baesi.bachelorthesis.phish.Phisher = ALL, FileAppender
-//	# Direct all messages there
-//	log4j.rootLogger = ALL, Console
-	
 }

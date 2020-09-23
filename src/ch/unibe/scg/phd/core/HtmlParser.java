@@ -10,16 +10,18 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ch.unibe.scg.phd.data.deprecated_overlays.Clickable;
-import ch.unibe.scg.phd.data.deprecated_overlays.TextBox;
+import ch.unibe.scg.phd.data.overlays.Clickable;
+import ch.unibe.scg.phd.data.overlays.TextBox;
 import ch.unibe.scg.phd.data.web.ClickableInputTypes;
 import ch.unibe.scg.phd.data.web.TextInputTypes;
 import ch.unibe.scg.phd.properties.WebStyles;
 
 public class HtmlParser {
 	
-	//private Log _log = new Log(HtmlParser.class);
+	private static Logger _LOG = LoggerFactory.getLogger(HtmlParser.class);
     
     private WebDriver _driver;
 	
@@ -158,7 +160,7 @@ public class HtmlParser {
         elements.addAll(buttons);
         elements.addAll(inputElements);
 
-        //_log.info(String.format("Found [%d] Clickables", inputElements.size()));
+        _LOG.debug("Found " + inputElements.size() + " clickables");
         return elements;
     }
 }
