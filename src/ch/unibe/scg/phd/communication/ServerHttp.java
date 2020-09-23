@@ -4,7 +4,7 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 
 import ch.unibe.scg.phd.io.Log;
-import ch.unibe.scg.phd.properties.Configuration;
+import ch.unibe.scg.phd.utils.FileUtil;
 
 public class ServerHttp {
 	
@@ -12,8 +12,7 @@ public class ServerHttp {
     
 	public static void start() {
 		// https://javaee.github.io/grizzly/httpserverframework.html
-		
-		HttpServer server = HttpServer.createSimpleServer(System.getProperty("user.dir") + Configuration.PATH_STATIC_HTML, 8080);
+		HttpServer server = HttpServer.createSimpleServer(FileUtil.getFullyQualifiedHttpServerRoot(), 8080);
 		for (NetworkListener each : server.getListeners()) {
 			// disable static resource caching to allow HTML file changes while server is running
 			System.out.println("Static HTTP listener found: " + each.getName());

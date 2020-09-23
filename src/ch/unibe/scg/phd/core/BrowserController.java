@@ -46,7 +46,7 @@ public class BrowserController {
     final private String _baseUrl;
     private Log _log = new Log(BrowserController.class);
     private Dimension _uiSpacing;
-    private CircularFifoQueue<ScreenshotRequest> _screenshotRequestBuffer = new CircularFifoQueue<>(5);
+    private CircularFifoQueue<ScreenshotRequest> _screenshotRequestBuffer = new CircularFifoQueue<>(1);
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
     
@@ -72,12 +72,12 @@ public class BrowserController {
     	initScreenshotReplyManager();
     	
     	// Firefox set up
-    	System.setProperty(Configuration.FIREFOX_DRIVER, System.getProperty("user.dir") + Configuration.PATH_DRIVERS + Configuration.FIREFOX_DRIVER_WIN64);
+    	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(Configuration.FIREFOX_DRIVER_WIN64));
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
         
         if (Configuration.FEATURE_ENABLE_ADBLOCK){
-            firefoxProfile.addExtension(new File(System.getProperty("user.dir") + Configuration.PATH_BROWSER_EXTENSIONS + Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS));
+            firefoxProfile.addExtension(new File(FileUtil.getFullyQualifiedExtensionsPath(Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS)));
         }
         firefoxOptions.setProfile(firefoxProfile);
         if (headless) {
