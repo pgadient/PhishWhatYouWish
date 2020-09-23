@@ -9,10 +9,11 @@
 
 
 <script>
+var currentHostName = window.location.hostname;
 var canvas = document.getElementById("screenshotCanvas")
 var wrapper = document.getElementById("wrapperDiv")
-var socket = new WebSocket("ws://localhost:8081/screenshots");
-var socketC = new WebSocket("ws://localhost:8081/control");
+var socket = new WebSocket("ws://" + currentHostName + ":8081/screenshots");
+var socketC = new WebSocket("ws://" + currentHostName + ":8081/control");
 var timerDragDrop;
 var mouseDown = false;
 var activeDrag = false;

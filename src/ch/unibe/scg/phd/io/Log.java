@@ -3,9 +3,8 @@ package ch.unibe.scg.phd.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.unibe.scg.phd.properties.Configuration;
-
 public class Log {
+	private static boolean _DEBUG = false;
     private final Logger _log;
 
 	@SuppressWarnings("rawtypes")
@@ -13,12 +12,16 @@ public class Log {
         _log = LoggerFactory.getLogger(c);
     }
 
+	public static void setDebug(boolean flag) {
+		_DEBUG = flag;
+	}
+	
     /**
      * Only logs a message if debug flag of executor is set to true
      * @param message the message to be logged
      */
     public void debug(String message) {
-        if (Configuration.FEATURE_DEBUG_OUTPUT) {
+        if (_DEBUG) {
             _log.debug(message);
         }
     }

@@ -15,12 +15,6 @@ public class Configuration {
 	public static final String FIREFOX_DRIVER_MACOS = "geckodriver-v0.27.0-macos";
 	public static final String FIREFOX_EXTENSION_ADBLOCKPLUS = "{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}.xpi";
 	
-	public static final boolean FEATURE_DEBUG_OUTPUT = true;
-	public static final boolean FEATURE_ENABLE_ADBLOCK = true;
-	public static final boolean FEATURE_HEADLESS = true;
-	
-	public static final String PARAM_DEFAULT_BASE_URL = "https://www.google.ch/";
-	public static final String PARAM_PHISHING_URL = "http://localhost/";
 	public static final long PARAM_AWAIT_BROWSER_SLEEP = 400;
 	public static final long PARAM_KEY_STROKE_SLEEP = 100;
 	public static final long PARAM_MOUSE_CLICK_SLEEP = 500;

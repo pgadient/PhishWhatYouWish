@@ -50,15 +50,7 @@ public class BrowserController {
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
     
-	public BrowserController() {
-		this(Configuration.PARAM_DEFAULT_BASE_URL, true);
-	}
-    
-    public BrowserController(String baseUrl) {
-    	this(baseUrl, true);
-    }
-    
-    public BrowserController(String baseUrl, boolean headless) {
+    public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
     	// stripping leading and trailing dashes from URL
     	while (baseUrl.startsWith("/")) {
             baseUrl = baseUrl.substring(1);
@@ -76,7 +68,7 @@ public class BrowserController {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
         
-        if (Configuration.FEATURE_ENABLE_ADBLOCK){
+        if (adblock){
             firefoxProfile.addExtension(new File(FileUtil.getFullyQualifiedExtensionsPath(Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS)));
         }
         firefoxOptions.setProfile(firefoxProfile);
