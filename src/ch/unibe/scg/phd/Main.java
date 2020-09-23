@@ -11,6 +11,7 @@ public class Main {
 		//TODO: tab support
 		//TODO: multi-user support
 		//TODO: webdriver.exe remains running after exit (at least on Windows x64)
+		FileUtil.collectSystemInfo();
 		FileUtil.prepareJarTempFolder();
 		BrowserController controller = new BrowserController("https://www.google.com/", false);
 		

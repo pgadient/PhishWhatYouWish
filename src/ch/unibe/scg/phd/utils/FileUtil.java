@@ -22,6 +22,13 @@ import java.nio.file.Paths;
 
 public class FileUtil {
     private static final Log _LOG = new Log(FileUtil.class);
+    private static String _OSTYPE;
+    private static boolean _STARTED_AS_JAR;
+    
+    public static void collectSystemInfo() {
+    	_OSTYPE = getOsType();
+    	_STARTED_AS_JAR = isStartedAsJAR();
+    }
     
     private static String getOsType() {
     	String name = System.getProperty("os.name");
@@ -35,21 +42,26 @@ public class FileUtil {
         	int realBitness = arch != null && arch.endsWith("64") || wow64Arch != null && wow64Arch.endsWith("64") ? 64 : 32;
         	if (realBitness == 64) {
         		System.out.println("FileUtil: Detected Windows x64 OS.");
+        		_OSTYPE = "Windows64";
         		return "Windows64";
         	} else {
         		System.out.println("FileUtil: Detected Windows x86 OS.");
+        		_OSTYPE = "Windows32";
         		return "Windows32";
         	}
     	} else if (name.toLowerCase().contains("nux")) {
     		if (bitness.contains("64")) {
     			System.out.println("FileUtil: Detected Linux x64 OS.");
+    			_OSTYPE = "Linux64";
         		return "Linux64";
         	} else {
         		System.out.println("FileUtil: Detected Linux x86 OS.");
+        		_OSTYPE = "Linux32";
         		return "Linux32";
         	}
     	} else {
 			System.out.println("FileUtil: Detected macOS.");
+			_OSTYPE = "macOS";
     		return "macOS";
     	}
     }
@@ -73,7 +85,7 @@ public class FileUtil {
     
     public static String getFullyQualifiedFilePath(String relativeFilePath) {
     	String url = null;
-    	if (isStartedAsJAR()) {
+    	if (_STARTED_AS_JAR) {
     		if (relativeFilePath.startsWith("/")) {
     			relativeFilePath = relativeFilePath.substring(1);
     		}
@@ -96,7 +108,7 @@ public class FileUtil {
 		
 		try {
 			path = URLDecoder.decode(url.toString(), "UTF-8");
-			if (isStartedAsJAR()) {
+			if (_STARTED_AS_JAR) {
 				path = path.substring(10, path.length() - 40);
 			} else {
 				// application started from source (and not from JAR)
@@ -107,10 +119,11 @@ public class FileUtil {
 		return path;
 	}
     
-    private static void copyFile(String src, String dst, String fileName) {
+    private static void copyFile(String src, String dst, String fileName, boolean isExecutable) {
     	 try {
+    		 String fqDstPath = System.getProperty("user.dir") + dst + fileName;
     		 InputStream is = FileUtil.class.getResourceAsStream(src + fileName);
-	    	 FileOutputStream fout = new FileOutputStream(System.getProperty("user.dir") + dst + fileName);
+	    	 FileOutputStream fout = new FileOutputStream(fqDstPath);
 	    	 
 	    	 byte[] b = new byte[1024];
 	    	 int numberOfBytes = 0;
@@ -120,22 +133,26 @@ public class FileUtil {
 	    	 }
 	    	 
 	    	 is.close();
-	    	 fout.close(); 
+	    	 fout.close();
+	    	 
+	    	 if (isExecutable && (_OSTYPE.contains("nux") || _OSTYPE.contains("mac"))) {
+	    		 File f = new File(fqDstPath);
+	    		 f.setExecutable(true);
+	    	 }
+	    	 
     	 } catch(IOException e) {
     		 e.printStackTrace();
     	 }
     }
 
     public static void prepareJarTempFolder() {
-    	boolean jarRun = isStartedAsJAR();
-    	
-    	if (jarRun) {
+    	if (_STARTED_AS_JAR) {
     		System.out.println("FileUtil: Application started from JAR file.");
     	} else {
     		System.out.println("FileUtil: Application started from source code.");
     	}
     	
-    	if (jarRun) {
+    	if (_STARTED_AS_JAR) {
     		File f1 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/extensions");
 	    	File f2 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/webdrivers");
 	    	File f3 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/wwwroot");
@@ -143,15 +160,15 @@ public class FileUtil {
 	    	f2.mkdirs();
 	    	f3.mkdirs();
 	    	System.out.println("FileUtil: Created temp folders.");
-	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN64);
-	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN32);
-	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN64);
-	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN32);
-	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_MACOS);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN64, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN32, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN64, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN32, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_MACOS, true);
 	    	System.out.println("FileUtil: Extracted webdriver files.");
-	    	copyFile(Configuration.PATH_BROWSER_EXTENSIONS, "/PhishingOnDemand/extensions/", Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS);
+	    	copyFile(Configuration.PATH_BROWSER_EXTENSIONS, "/PhishingOnDemand/extensions/", Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS, false);
 	    	System.out.println("FileUtil: Extracted browser extensions.");
-	    	copyFile(Configuration.PATH_STATIC_HTML, "/PhishingOnDemand/wwwroot/", Configuration.PATH_STATIC_HTML_INDEX);
+	    	copyFile(Configuration.PATH_STATIC_HTML, "/PhishingOnDemand/wwwroot/", Configuration.PATH_STATIC_HTML_INDEX, false);
 	    	System.out.println("FileUtil: Extracted static HTML content.");
     	}
     }
@@ -190,7 +207,7 @@ public class FileUtil {
     }
 
     public static String getFullyQualifiedDriverPath(String fileName) {
-    	if (isStartedAsJAR()) {
+    	if (_STARTED_AS_JAR) {
     		return System.getProperty("user.dir") + "/PhishingOnDemand/webdrivers/" + fileName;
     	} else {
     		return getFullyQualifiedFilePath(Configuration.PATH_DRIVERS + fileName);
@@ -198,7 +215,7 @@ public class FileUtil {
     }
     
     public static String getFullyQualifiedExtensionsPath(String fileName) {
-    	if (isStartedAsJAR()) {
+    	if (_STARTED_AS_JAR) {
     		return System.getProperty("user.dir") + "/PhishingOnDemand/extensions/" + fileName;
     	} else {
     		return getFullyQualifiedFilePath(Configuration.PATH_BROWSER_EXTENSIONS + fileName);
@@ -206,7 +223,7 @@ public class FileUtil {
     }
     
     public static String getFullyQualifiedHttpServerRoot() {
-    	if (isStartedAsJAR()) {
+    	if (_STARTED_AS_JAR) {
     		return System.getProperty("user.dir") + "/PhishingOnDemand/wwwroot/";
     	} else {
     		return System.getProperty("user.dir") + "/src" + Configuration.PATH_STATIC_HTML;
@@ -214,8 +231,7 @@ public class FileUtil {
     }
     
     public static String getAppropriateDriver() {
-    	String osName = getOsType();
-    	switch (osName) {
+    	switch (_OSTYPE) {
     	case "Windows64":
     		return Configuration.FIREFOX_DRIVER_WIN64;
     	case "Windows32":
