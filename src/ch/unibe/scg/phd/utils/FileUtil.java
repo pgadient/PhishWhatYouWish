@@ -42,26 +42,26 @@ public class FileUtil {
         	String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
         	int realBitness = arch != null && arch.endsWith("64") || wow64Arch != null && wow64Arch.endsWith("64") ? 64 : 32;
         	if (realBitness == 64) {
-        		_LOG.warn("Detected Windows x64 OS.");
+        		_LOG.warn("[OS] Detected Windows x64 OS.");
         		_OSTYPE = "Windows64";
         		return "Windows64";
         	} else {
-        		_LOG.warn("Detected Windows x86 OS.");
+        		_LOG.warn("[OS] Detected Windows x86 OS.");
         		_OSTYPE = "Windows32";
         		return "Windows32";
         	}
     	} else if (name.toLowerCase().contains("nux")) {
     		if (bitness.contains("64")) {
-    			_LOG.warn("Detected Linux x64 OS.");
+    			_LOG.warn("[OS] Detected Linux x64 OS.");
     			_OSTYPE = "Linux64";
         		return "Linux64";
         	} else {
-        		_LOG.warn("Detected Linux x86 OS.");
+        		_LOG.warn("[OS] Detected Linux x86 OS.");
         		_OSTYPE = "Linux32";
         		return "Linux32";
         	}
     	} else {
-    		_LOG.warn("Detected macOS.");
+    		_LOG.warn("[OS] Detected macOS.");
 			_OSTYPE = "macOS";
     		return "macOS";
     	}
@@ -148,9 +148,9 @@ public class FileUtil {
 
     public static void prepareJarTempFolder() {
     	if (_STARTED_AS_JAR) {
-    		_LOG.warn("Application started from JAR file.");
+    		_LOG.warn("[EXEC] Application started from JAR file.");
     	} else {
-    		_LOG.warn("Application started from source code.");
+    		_LOG.warn("[EXEC] Application started from source code.");
     	}
     	
     	if (_STARTED_AS_JAR) {

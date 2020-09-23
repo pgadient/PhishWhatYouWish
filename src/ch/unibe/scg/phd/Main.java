@@ -62,7 +62,7 @@ public class Main {
 	}
 	
 	private static void printCurrentConfiguration() {
-		StringBuilder featureState = new StringBuilder();
+		StringBuilder featureState = new StringBuilder("[Configuration] ");
 		if (_FEATURE_HEADLESS) {
 			featureState.append("headless: on, ");
 		} else {

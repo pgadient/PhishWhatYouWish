@@ -40,7 +40,7 @@ public class SeleniumLog {
 								} else if (currentLineLower.contains("error")) {
 									_LOG.error(currentLine);
 								} else {
-									_LOG.warn(currentLine);
+									_LOG.info(currentLine);
 								}
 							}
 						}

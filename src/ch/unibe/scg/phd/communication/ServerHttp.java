@@ -25,7 +25,7 @@ public class ServerHttp {
 			public void run() {
 				try {
 					server.start();
-					_LOG.warn("HTTP server online for static content.");
+					_LOG.info("HTTP server online for static content.");
 					while (true) {
 						Thread.currentThread().join();
 						_LOG.error("Thread finished join of himself (should never happen).");
