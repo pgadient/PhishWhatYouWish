@@ -48,27 +48,27 @@
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/reactor-core-3.3.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/reactor-netty-0.9.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-api-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-api-4.0.0-alpha-6-sources.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-chrome-driver-4.0.0-alpha-6.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-chrome-driver-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-chrome-driver-4.0.0-alpha-6-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-chromium-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-devtools-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-edge-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-edgehtml-driver-4.0.0-alpha-6.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-firefox-driver-4.0.0-alpha-6.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-firefox-driver-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-firefox-driver-4.0.0-alpha-6-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-firefox-xpi-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-http-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-ie-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-java-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-json-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-opera-driver-4.0.0-alpha-6.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-remote-driver-4.0.0-alpha-6.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-remote-driver-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-remote-driver-4.0.0-alpha-6-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-safari-driver-4.0.0-alpha-6.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/selenium/selenium-support-4.0.0-alpha-6.jar" sourcepath="src/ch/unibe/scg/phd/lib/selenium/selenium-support-4.0.0-alpha-6-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/grizzly-http-all-3.0.0-M1.jar" sourcepath="src/ch/unibe/scg/phd/lib/generic/grizzly-http-all-3.0.0-M1-sources.jar"/>
-	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/commons-collections4-4.4.jar" sourcepath="src/ch/unibe/scg/phd/lib/generic/commons-collections4-4.4-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/seleniumDependencies/slf4j-api-1.7.30.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/commons-io-2.8.0.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/log4j-api-2.13.3.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/log4j-core-2.13.3.jar" sourcepath="src/ch/unibe/scg/phd/lib/generic/log4j-core-2.13.3-sources.jar"/>
 	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/log4j-slf4j-impl-2.13.3.jar"/>
+	<classpathentry kind="lib" path="src/ch/unibe/scg/phd/lib/generic/selenium-shutterbug-1.2.jar" sourcepath="src/ch/unibe/scg/phd/lib/generic/selenium-shutterbug-1.2-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

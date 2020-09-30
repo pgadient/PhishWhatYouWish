@@ -166,8 +166,14 @@ public class FileUtil {
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN64, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_LIN32, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_MACOS, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.CHROME_DRIVER_WIN64, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.CHROME_DRIVER_WIN32, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.CHROME_DRIVER_LIN64, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.CHROME_DRIVER_LIN32, true);
+	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.CHROME_DRIVER_MACOS, true);
 	    	_LOG.warn("Extracted webdriver files.");
 	    	copyFile(Configuration.PATH_BROWSER_EXTENSIONS, "/PhishingOnDemand/extensions/", Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS, false);
+	    	copyFile(Configuration.PATH_BROWSER_EXTENSIONS, "/PhishingOnDemand/extensions/", Configuration.CHROME_EXTENSION_ADBLOCKPLUS, false);
 	    	_LOG.warn("Extracted browser extensions.");
 	    	copyFile(Configuration.PATH_STATIC_HTML, "/PhishingOnDemand/wwwroot/", Configuration.PATH_STATIC_HTML_INDEX, false);
 	    	_LOG.warn("Extracted static HTML content.");
@@ -230,21 +236,39 @@ public class FileUtil {
     	}
     }
     
-    public static String getAppropriateDriver() {
-    	switch (_OSTYPE) {
-    	case "Windows64":
-    		return Configuration.FIREFOX_DRIVER_WIN64;
-    	case "Windows32":
-    		return Configuration.FIREFOX_DRIVER_WIN32;
-    	case "Linux64":
-    		return Configuration.FIREFOX_DRIVER_LIN64;
-    	case "Linux32":
-    		return Configuration.FIREFOX_DRIVER_LIN32;
-    	case "macOS":
-    		return Configuration.FIREFOX_DRIVER_MACOS;
-    	default:
-    		// we assume that linux distributions with flawed identifiers exist
-    		return Configuration.FIREFOX_DRIVER_LIN32;
+    public static String getAppropriateDriver(String browser) {
+    	if (browser.equals("firefox")) {
+    		switch (_OSTYPE) {
+    		case "Windows64":
+    			return Configuration.FIREFOX_DRIVER_WIN64;
+    		case "Windows32":
+    			return Configuration.FIREFOX_DRIVER_WIN32;
+    		case "Linux64":
+    			return Configuration.FIREFOX_DRIVER_LIN64;
+    		case "Linux32":
+    			return Configuration.FIREFOX_DRIVER_LIN32;
+    		case "macOS":
+    			return Configuration.FIREFOX_DRIVER_MACOS;
+    		default:
+    			// we assume that linux distributions with flawed identifiers exist
+    			return Configuration.FIREFOX_DRIVER_LIN32;
+    		}
+    	} else {
+    		switch (_OSTYPE) {
+    		case "Windows64":
+    			return Configuration.CHROME_DRIVER_WIN64;
+    		case "Windows32":
+    			return Configuration.CHROME_DRIVER_WIN32;
+    		case "Linux64":
+    			return Configuration.CHROME_DRIVER_LIN64;
+    		case "Linux32":
+    			return Configuration.CHROME_DRIVER_LIN32;
+    		case "macOS":
+    			return Configuration.CHROME_DRIVER_MACOS;
+    		default:
+    			// we assume that linux distributions with flawed identifiers exist
+    			return Configuration.CHROME_DRIVER_LIN32;
+    		}
     	}
     	
     }

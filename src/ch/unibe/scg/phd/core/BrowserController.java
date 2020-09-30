@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.glassfish.grizzly.websockets.WebSocket;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -29,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.unibe.scg.phd.communication.ServerWebSocket;
-import ch.unibe.scg.phd.communication.requests.ScreenshotRequest;
 import ch.unibe.scg.phd.data.overlays.Clickable;
 import ch.unibe.scg.phd.data.overlays.TextBox;
 import ch.unibe.scg.phd.properties.Configuration;
@@ -40,17 +37,19 @@ public class BrowserController {
 	
 	private static Logger _LOG = LoggerFactory.getLogger(BrowserController.class);
 	private String _url = "";
-	private final Object _lock = new Object();
+	private String _faviconUrl = "";
+	private String _title = "";
+	private String _pagePath = "";
     public final String[] _faviconRel = {"icon", "shortcut icon"};
     private HtmlParser _parser;
     private Sleeper _sleeper;
     private WebDriver _driver;
     final private String _baseUrl;
     private Dimension _uiSpacing;
-    private CircularFifoQueue<ScreenshotRequest> _screenshotRequestBuffer = new CircularFifoQueue<>(1);
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
     private FirefoxOptions _ffOptions;
+//    private ChromeOptions _crOptions;
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
     	// stripping leading and trailing dashes from URL
@@ -65,8 +64,8 @@ public class BrowserController {
     	_sleeper = new Sleeper();
     	initScreenshotReplyManager();
     	
-    	// Firefox set up
-    	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver()));
+//    	Firefox set up
+    	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("firefox")));
         _ffOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
         
@@ -81,11 +80,17 @@ public class BrowserController {
             firefoxBinary.addCommandLineOptions("--log-level=1");
         }
         
+        // Chrome set up
+//    	System.setProperty(Configuration.CHROME_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("chrome")));
+//    	_crOptions = new ChromeOptions();
+//    	_crOptions.addArguments("--no-sandbox");
+    	
         initBrowser();
     }
 	
     public void initBrowser() {
     	_driver = new FirefoxDriver(_ffOptions);
+//    	_driver = new ChromeDriver(_crOptions);
     	_parser = new HtmlParser(_driver);
         _uiSpacing = getBrowserUiSpacing();
         _LOG.info("UI spacing is: " + _uiSpacing.width + "x" + _uiSpacing.height);
@@ -293,62 +298,73 @@ public class BrowserController {
         }
     }
 
-    public void updateTitleAndUrlAndFavicon() {
-    	String url = FileUtil.getFavicon(this, _driver);
-		String title = getTitle();
-		String path = getPagePath();
-		
-		ServerWebSocket.sendControlMessage("T:" + title);
-        ServerWebSocket.sendControlMessage("F:" + url);
-		ServerWebSocket.sendControlMessage("P:" + path);
-		ServerWebSocket.sendControlMessage("S:ScrollUpCmd");
-    }
-    
-    public void enqueueScreenshotReply(ScreenshotRequest req) {
-    	_screenshotRequestBuffer.add(req);
-    	synchronized(_lock) {
-    		_lock.notifyAll();
+    public void updateTitleAndUrlAndFavicon(boolean needsUpdate) {
+    	if (needsUpdate) {
+    		_faviconUrl = FileUtil.getFavicon(this, _driver);
+    		_title = getTitle();
+    		_pagePath = getPagePath();	
+    		ServerWebSocket.sendControlMessage("R:ResetCmd");
+            _LOG.warn("P:" + _pagePath);
+    		ServerWebSocket.sendControlMessage("P:" + _pagePath);
     	}
+		
+		_LOG.warn("T:" + _title);
+		ServerWebSocket.sendControlMessage("T:" + _title);
+		_LOG.warn("F:" + _faviconUrl);
+        ServerWebSocket.sendControlMessage("F:" + _faviconUrl);
+        _LOG.warn("U:" + _pagePath);
+        ServerWebSocket.sendControlMessage("U:" + _pagePath);
+//		ServerWebSocket.sendControlMessage("S:ScrollUpCmd");
     }
     
     private void initScreenshotReplyManager() {
+    	for (int i = 0; i < Configuration.PARAM_NUMBER_SCREENSHOT_THREADS; i++) {
+    		spawnScreenshotThread();
+		}
+    	
+    	_LOG.warn("Spawned " + Configuration.PARAM_NUMBER_SCREENSHOT_THREADS + " screenshot threads.");
+    }
+    
+    private void spawnScreenshotThread() {
     	Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
+					Dimension d = null;
+					
+					// ServerWebSocket might not be ready already.
 					try {
-						ScreenshotRequest req = _screenshotRequestBuffer.remove();
-						int width = req.getWidth();
-						int height = req.getHeight();
-						WebSocket socket = req.getScreenshotSocket();
-						
-						boolean urlChangeOccurred = urlHasChanged();
-						boolean uiChangeOccurred = ((width != _clientWindowWidth) || (height != _clientWindowHeight));
-						_LOG.debug("url/ui: " + urlChangeOccurred + " / " + uiChangeOccurred);
-						if (urlChangeOccurred || uiChangeOccurred) {
-							_clientWindowWidth = width;
-							_clientWindowHeight = height;
-							setBrowserToViewportDimension(uiChangeOccurred, width, height);
-							updateTitleAndUrlAndFavicon();
-							injectNativeControls();
-						}
+						d = ServerWebSocket.getClientDimension();
+						Thread.sleep(50);
 
-						byte[] image = FileUtil.takeScreenshot(_driver);
-						socket.send(image);
-						
-						if (_screenshotRequestBuffer.size() > 0) {
-							_LOG.warn("Currently queued screenshots: " + _screenshotRequestBuffer.size());
-						}
-						
-					} catch (Exception e) {
-						try {
-							synchronized(_lock) {
-								_lock.wait();
+						if (d != null) {
+							int width = d.getWidth();
+							int height = d.getHeight();
+
+							boolean uiChangeOccurred = ((width != _clientWindowWidth) || (height != _clientWindowHeight));
+							if (uiChangeOccurred) {
+								_clientWindowWidth = width;
+								_clientWindowHeight = height;
+								setBrowserToViewportDimension(uiChangeOccurred, width, height);
 							}
-						} catch (InterruptedException e1) {}
-					}
+							
+							boolean urlChangeOccurred = urlHasChanged();
+							//_LOG.warn("url/ui: " + urlChangeOccurred + " / " + uiChangeOccurred);
+							if (urlChangeOccurred) {
+								updateTitleAndUrlAndFavicon(urlChangeOccurred);
+								injectNativeControls();
+							}
+	
+							// Google Chrome webdriver needs scrolling for full capture
+							// unavailable full page screenshots are a won't fix issue: 
+							// https://bugs.chromium.org/p/chromedriver/issues/detail?id=294
+//							byte[] image = Shutterbug.shootPage(_driver, Capture.FULL, true).getBytes();
+							byte[] image = FileUtil.takeScreenshot(_driver);
+							
+							ServerWebSocket.sendImage(image);
+						}
+					} catch (Exception e) {}
 				}
-				
 		}};
 		Thread t = new Thread(r);
 		t.start();
@@ -358,20 +374,16 @@ public class BrowserController {
     	Runnable rClickables = new Runnable() {
 			@Override
 			public void run() {
+//				ServerWebSocket.sendControlMessage("Y:busy");
+				
 				List<Clickable> clickables = _parser.getClickables();
 		    	for (Clickable c : clickables) {
 		    		Point l = c.getLocation(); // location
 		    		Dimension d = c.getDimension(); // dimension
 					ServerWebSocket.sendControlMessage("C:" + l.x + "," + l.y + "|" + d.width + "," + d.height);
 				}
-			}};
-    	Thread tClickables = new Thread(rClickables);
-    	tClickables.start();
-    	
-    	Runnable rInputs = new Runnable() {
-			@Override
-			public void run() {
-				List<TextBox> textboxes = _parser.getTextboxes();
+		    	
+		    	List<TextBox> textboxes = _parser.getTextboxes();
 		    	for (TextBox t : textboxes) {
 		    		Point l = t.getLocation();
 		    		Dimension d = t.getDimension();
@@ -387,9 +399,11 @@ public class BrowserController {
 		    		tConfig.append(t.getFontColor()).append("|!|").append(t.getFontFamily()).append("|!|").append(t.getFontSize()).append("|!|").append(t.getFontStyle()).append("|!|").append(t.getFontWeight());
 					ServerWebSocket.sendControlMessage("I:" + tConfig.toString());
 				}
+		    	
+//		    	ServerWebSocket.sendControlMessage("Z:endbusy");
 			}};
-    	Thread tInputs = new Thread(rInputs);
-    	tInputs.start();
+    	Thread tClickables = new Thread(rClickables);
+    	tClickables.start();
     }
 
     public void sleep(long millis) {

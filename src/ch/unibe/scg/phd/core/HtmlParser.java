@@ -45,7 +45,7 @@ public class HtmlParser {
         List<TextBox> result = new ArrayList<>();
         List<WebElement> elements = filterTextInputElements();
         for (WebElement element: elements) {
-            Point location = element.getLocation();
+        	Point location = element.getLocation();
             Dimension dimension = element.getSize();
 
             TextBox t = new TextBox(location, dimension);

@@ -4,6 +4,7 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
+import org.openqa.selenium.Dimension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class ServerWebSocket {
 		_CONTROL_APPLICATION = new WebSocketControl(controller);
 		WebSocketEngine.getEngine().register("", "/control", _CONTROL_APPLICATION);
 		
-		_SCREENSHOT_APPLICATION = new WebSocketScreenshots(controller);
+		_SCREENSHOT_APPLICATION = new WebSocketScreenshots();
 		WebSocketEngine.getEngine().register("", "/screenshots", _SCREENSHOT_APPLICATION);
 		
 		Runnable r = new Runnable() {
@@ -51,5 +52,13 @@ public class ServerWebSocket {
 	
 	public static void sendControlMessage(String message) {
 		_CONTROL_APPLICATION.sendControlMessage(message);
+	}
+	
+	public static void sendImage(byte[] image) {
+		_SCREENSHOT_APPLICATION.sendImage(image);
+	}
+	
+	public static Dimension getClientDimension() {
+		return _SCREENSHOT_APPLICATION.getCurrentClientDimension();
 	}
 }

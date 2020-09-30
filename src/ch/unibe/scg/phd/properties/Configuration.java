@@ -12,12 +12,21 @@ public class Configuration {
 	public static final String FIREFOX_DRIVER_WIN32 = "geckodriver-v0.27.0-win32.exe";
 	public static final String FIREFOX_DRIVER_LIN64 = "geckodriver-v0.27.0-linux64";
 	public static final String FIREFOX_DRIVER_LIN32 = "geckodriver-v0.27.0-linux32";
-	public static final String FIREFOX_DRIVER_MACOS = "geckodriver-v0.27.0-macos";
+	public static final String FIREFOX_DRIVER_MACOS = "geckodriver-v0.27.0-macos"; // is 32-bit
 	public static final String FIREFOX_EXTENSION_ADBLOCKPLUS = "{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}.xpi";
+	
+	public static final String CHROME_DRIVER = "webdriver.chrome.driver";
+	public static final String CHROME_DRIVER_WIN64 = "chromedriver-v85.0.4183.87-win32.exe";
+	public static final String CHROME_DRIVER_WIN32 = "chromedriver-v85.0.4183.87-win32.exe";
+	public static final String CHROME_DRIVER_LIN64 = "chromedriver-v85.0.4183.87-linux64";
+	public static final String CHROME_DRIVER_LIN32 = "chromedriver-v85.0.4183.87-linux64"; // won't work
+	public static final String CHROME_DRIVER_MACOS = "chromedriver-v85.0.4183.87-macos"; // is 64-bit
+	public static final String CHROME_EXTENSION_ADBLOCKPLUS = "ogdlpmhglpejoiomcodnpjnfgcpmgale.crx";
 	
 	public static final long PARAM_AWAIT_BROWSER_SLEEP = 400;
 	public static final long PARAM_KEY_STROKE_SLEEP = 100;
 	public static final long PARAM_MOUSE_CLICK_SLEEP = 500;
+	public static final int PARAM_NUMBER_SCREENSHOT_THREADS = 1;
 	
     public static final String PARAM_SCREENSHOT_BASE_PATH = "./screenshots/";
     public static final String PARAM_FAVICONS_BASE_PATH = "./favicons/";

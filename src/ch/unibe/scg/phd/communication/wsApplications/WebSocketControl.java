@@ -32,6 +32,12 @@ public class WebSocketControl extends WebSocketApplication {
 		String[] dimensions;
 		
 		switch (text.charAt(0)) {
+		case 'I': // client needs metadata
+			_controller.updateTitleAndUrlAndFavicon(false);
+			break;
+		case 'B': // client needs clickables
+			_controller.injectNativeControls();
+			break;
 		case 'C': // mouse-click left
 			dimensions = originalMessage.split(",");
 			x = Integer.valueOf(dimensions[0]);

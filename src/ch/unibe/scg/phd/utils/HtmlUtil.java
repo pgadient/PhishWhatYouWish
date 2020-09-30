@@ -29,7 +29,7 @@ public class HtmlUtil {
 
         if (!(tempLink.startsWith(_HTTP) || tempLink.startsWith(_HTTPS))) {
             if (tempLink.startsWith("/")) {
-                tempLink = host + tempLink;
+                tempLink = host + tempLink.substring(1);
             } else {
                 tempLink = host + "/" + tempLink;
             }
