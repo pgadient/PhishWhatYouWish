@@ -21,6 +21,7 @@ var timerDragDrop;
 var mouseDown = false;
 var activeDrag = false;
 var lastImageReceived = new Date().getMilliseconds();
+var previousHistoryLength = 0;
 
 //var iframe = document.createElement("iframe");
 //iframe.setAttribute("src", "http://127.0.0.1:8080/delay");
@@ -44,6 +45,9 @@ function updateLocalView() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
+function checkHistoryChange() {
+    // send favicon path to server which performs redirection based on internal map
+}
 async function updateView() {
     socket.send(window.innerWidth + "x" + window.innerHeight);
 }
@@ -55,6 +59,7 @@ async function updateLocalAndRemoteView() {
     //updateRemoteView(); todo for initial screen
 }
 
+checkHistoryChange(); 
 
 window.onload = function beginCommunication() {
     updateLocalView();
@@ -203,7 +208,7 @@ window.onload = function beginCommunication() {
             console.log("Received input element.");
             break;
         case 'F': // update favicon
-            console.log("Received favicon.");
+            console.log("Received favicon: " + originalMessage);
             updateFavicon(originalMessage);
 			break;
         //case 'Z': // update favicon

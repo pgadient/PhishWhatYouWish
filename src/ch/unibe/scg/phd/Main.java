@@ -22,7 +22,7 @@ public class Main {
 	private static boolean _FEATURE_DEBUG_OUTPUT = true;
 	private static boolean _FEATURE_ENABLE_ADBLOCK = true;
 	private static boolean _FEATURE_HEADLESS = false;
-	private static String _PARAM_DEFAULT_BASE_URL = "https://www.paypal.com/ch/signin"; //"https://www.google.ch/";
+	private static String _PARAM_DEFAULT_BASE_URL = "https://www.google.com/";
 	private static Configuration _configuration;
 
 	public static void main(String[] args) {

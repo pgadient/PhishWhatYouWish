@@ -80,7 +80,7 @@ public class BrowserController {
             firefoxBinary.addCommandLineOptions("--log-level=1");
         }
         
-        // Chrome set up
+//      Chrome set up
 //    	System.setProperty(Configuration.CHROME_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("chrome")));
 //    	_crOptions = new ChromeOptions();
 //    	_crOptions.addArguments("--no-sandbox");
@@ -281,40 +281,33 @@ public class BrowserController {
         try {
             URL url = new URL(current);
             String path = url.getPath();
-            if (path == null) {
-                return "/";
-            }
-            if (path.startsWith("/")) {
-                path = path.substring(1);
+            if (path == null || path.equals("") || path.equals("/")) {
+                return "";
             }
             String query = url.getQuery();
             if (query == null) {
-                return "/" + path;
+                return path;
             }
             return path + "?" + query;
         } catch (MalformedURLException e) {
             _LOG.warn("Failed to create URL Object from current url string " + current);
-            return "/";
+            return "";
         }
     }
 
-    public void updateTitleAndUrlAndFavicon(boolean needsUpdate) {
-    	if (needsUpdate) {
-    		_faviconUrl = FileUtil.getFavicon(this, _driver);
-    		_title = getTitle();
-    		_pagePath = getPagePath();	
-    		ServerWebSocket.sendControlMessage("R:ResetCmd");
-            _LOG.warn("P:" + _pagePath);
-    		ServerWebSocket.sendControlMessage("P:" + _pagePath);
-    	}
+    public void updateTitleAndUrlAndFavicon(boolean needsReset) {
+		_pagePath = getPagePath();	
 		
-		_LOG.warn("T:" + _title);
-		ServerWebSocket.sendControlMessage("T:" + _title);
-		_LOG.warn("F:" + _faviconUrl);
-        ServerWebSocket.sendControlMessage("F:" + _faviconUrl);
-        _LOG.warn("U:" + _pagePath);
-        ServerWebSocket.sendControlMessage("U:" + _pagePath);
-//		ServerWebSocket.sendControlMessage("S:ScrollUpCmd");
+		if (needsReset) {
+			ServerWebSocket.sendControlMessage("R:ResetCmd");	
+			ServerWebSocket.sendControlMessage("P:" + _pagePath);
+		} else {
+		
+        	_faviconUrl = FileUtil.getFavicon(this, _driver);
+    		_title = getTitle();
+    		ServerWebSocket.sendControlMessage("T:" + _title);
+            ServerWebSocket.sendControlMessage("F:" + _faviconUrl);
+		}
     }
     
     private void initScreenshotReplyManager() {
@@ -351,7 +344,7 @@ public class BrowserController {
 							boolean urlChangeOccurred = urlHasChanged();
 							//_LOG.warn("url/ui: " + urlChangeOccurred + " / " + uiChangeOccurred);
 							if (urlChangeOccurred) {
-								updateTitleAndUrlAndFavicon(urlChangeOccurred);
+								updateTitleAndUrlAndFavicon(true);
 								injectNativeControls();
 							}
 	

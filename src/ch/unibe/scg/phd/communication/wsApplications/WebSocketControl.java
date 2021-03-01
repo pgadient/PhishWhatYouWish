@@ -13,6 +13,7 @@ public class WebSocketControl extends WebSocketApplication {
 
 	BrowserController _controller;
 	WebSocket _currentSocket; // only supports one client at this time
+	boolean _firstConnect = false;
 	
 	public WebSocketControl(BrowserController controller) {
 		_controller = controller;
@@ -22,6 +23,7 @@ public class WebSocketControl extends WebSocketApplication {
 	public void onConnect(WebSocket socket) {
 	   _LOG.info("Client connected to control channel.");
 	   _currentSocket = socket;
+	   _firstConnect = true;
 	}
 	
 	@Override
@@ -91,6 +93,14 @@ public class WebSocketControl extends WebSocketApplication {
 			_LOG.warn("Received restart event.");
 			_controller.restartHeadlessBrowser();
 			break;
+		case 'V': // received back button event
+			_LOG.warn("Received back event.");
+//			_controller.navigateBack();
+			break;
+		case 'W': // received forward button event
+			_LOG.warn("Received forward event.");
+			_controller.navigateForward();
+			break;
 		}
 		
 	}
@@ -100,5 +110,13 @@ public class WebSocketControl extends WebSocketApplication {
 	
 	public void sendControlMessage(String message) {
 		_currentSocket.send(message);
+	}
+	
+	public boolean getFirstConnectState() {
+		return _firstConnect;
+	}
+	
+	public void setFirstConnectState(boolean newState) {
+		_firstConnect = newState;
 	}
 }

@@ -26,7 +26,6 @@ public class WebSocketScreenshots extends WebSocketApplication {
 	public void onMessage(WebSocket socket, String text) {
 		String[] dimensions = text.split("x");
 		_dimension = new Dimension(Integer.valueOf(dimensions[0]), Integer.valueOf(dimensions[1]));
-//		_controller.enqueueScreenshotReply(new ScreenshotRequest(width, height, socket));
 	}
 
 	@Override

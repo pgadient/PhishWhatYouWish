@@ -61,4 +61,12 @@ public class ServerWebSocket {
 	public static Dimension getClientDimension() {
 		return _SCREENSHOT_APPLICATION.getCurrentClientDimension();
 	}
+	
+	public static boolean isNewlyConnected() {
+		return _CONTROL_APPLICATION.getFirstConnectState();
+	}
+	
+	public static void setNewlyConnected(boolean newState) {
+		_CONTROL_APPLICATION.setFirstConnectState(newState);
+	}
 }
