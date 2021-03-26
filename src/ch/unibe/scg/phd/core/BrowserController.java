@@ -1,12 +1,18 @@
 package ch.unibe.scg.phd.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.CharBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.openqa.selenium.By;
@@ -50,6 +56,7 @@ public class BrowserController {
     private int _clientWindowHeight = 0;
     private FirefoxOptions _ffOptions;
 //    private ChromeOptions _crOptions;
+    private ConcurrentHashMap<Integer, String> _websiteMappings = new ConcurrentHashMap<Integer, String>();
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
     	// stripping leading and trailing dashes from URL
@@ -302,12 +309,32 @@ public class BrowserController {
 			ServerWebSocket.sendControlMessage("R:ResetCmd");	
 			ServerWebSocket.sendControlMessage("P:" + _pagePath);
 		} else {
-		
-        	_faviconUrl = FileUtil.getFavicon(this, _driver);
+		    _faviconUrl = FileUtil.getFavicon(this, _driver);
+        	String _localFaviconUrl = prepareLocalFavicon(_faviconUrl);
     		_title = getTitle();
     		ServerWebSocket.sendControlMessage("T:" + _title);
-            ServerWebSocket.sendControlMessage("F:" + _faviconUrl);
+            ServerWebSocket.sendControlMessage("F:" + _localFaviconUrl);
 		}
+    }
+    
+    private String prepareLocalFavicon(String url) {
+    	String localFile = convertPathFromRemoteToLocal(url);
+    	String localURL = "http://127.0.0.1:8080/" + localFile;
+    	InputStream in;
+		try {
+			in = new URL(url).openStream();
+			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot() + localFile), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return localURL;
+    }
+    
+    private String convertPathFromRemoteToLocal(String url) {
+    	int currentWebsiteViewCount = _websiteMappings.size();
+    	this._websiteMappings.put(currentWebsiteViewCount, url);
+    	return currentWebsiteViewCount + ".ico";
     }
     
     private void initScreenshotReplyManager() {
