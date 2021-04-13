@@ -101,8 +101,11 @@ public class WebSocketControl extends WebSocketApplication {
 			_LOG.warn("Received forward event.");
 			_controller.navigateForward();
 			break;
+		case 'A':
+			_controller.dimensionCheck();
+		case 'F':	
+			_controller.prepareNextFavicon();
 		}
-		
 	}
 
 	@Override

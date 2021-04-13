@@ -197,6 +197,7 @@ public class FileUtil {
     	
     	return new byte[0];
     }
+    
 
     public static byte[] takeScreenshot(WebDriver driver) {
     	return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);

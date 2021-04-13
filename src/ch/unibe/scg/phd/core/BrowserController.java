@@ -1,6 +1,9 @@
 package ch.unibe.scg.phd.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -14,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -31,6 +35,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
 
 import ch.unibe.scg.phd.communication.ServerWebSocket;
 import ch.unibe.scg.phd.data.overlays.Clickable;
@@ -42,21 +47,22 @@ import ch.unibe.scg.phd.utils.HtmlUtil;
 public class BrowserController {
 	
 	private static Logger _LOG = LoggerFactory.getLogger(BrowserController.class);
-	private String _url = "";
-	private String _faviconUrl = "";
-	private String _title = "";
-	private String _pagePath = "";
-    public final String[] _faviconRel = {"icon", "shortcut icon"};
-    private HtmlParser _parser;
-    private Sleeper _sleeper;
+	private HtmlParser _parser;
+    private Sleeper _sleeper;	   
     private WebDriver _driver;
-    final private String _baseUrl;
-    private Dimension _uiSpacing;
+	private Dimension _uiSpacing;
+    private FirefoxOptions _ffOptions;
+    //private ChromeOptions _crOptions;
+    private ConcurrentHashMap<Integer, String> _websiteMappings = new ConcurrentHashMap<Integer, String>();
+	private String _url = "";
+	final private String _baseUrl;
+    public final String[] _faviconRel = {"icon", "shortcut icon"};
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
-    private FirefoxOptions _ffOptions;
-//    private ChromeOptions _crOptions;
-    private ConcurrentHashMap<Integer, String> _websiteMappings = new ConcurrentHashMap<Integer, String>();
+    private int _faviconID = 0;
+    private boolean _isExecuting = false;
+    private boolean _initialCall = true;
+    
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
     	// stripping leading and trailing dashes from URL
@@ -71,11 +77,10 @@ public class BrowserController {
     	_sleeper = new Sleeper();
     	initScreenshotReplyManager();
     	
-//    	Firefox set up
+    	//Firefox set up
     	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("firefox")));
         _ffOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
-        
         if (adblock){
             firefoxProfile.addExtension(new File(FileUtil.getFullyQualifiedExtensionsPath(Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS)));
         }
@@ -87,22 +92,40 @@ public class BrowserController {
             firefoxBinary.addCommandLineOptions("--log-level=1");
         }
         
-//      Chrome set up
-//    	System.setProperty(Configuration.CHROME_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("chrome")));
-//    	_crOptions = new ChromeOptions();
-//    	_crOptions.addArguments("--no-sandbox");
-    	
+        //Chrome set up
+        /*
+		system.setProperty(Configuration.CHROME_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("chrome")));
+		_crOptions = new ChromeOptions();
+		_crOptions.addArguments("--no-sandbox");
+        */
+        
+        createFaviconFolder();
+        //updateIndexHtml();
         initBrowser();
+    }
+    
+    public void createFaviconFolder() {
+    	File faviconFolder = new File(FileUtil.getFullyQualifiedHttpServerRoot() + "favicons");
+    	if(faviconFolder.exists()) {
+        	try {
+				FileUtils.deleteDirectory(faviconFolder);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        faviconFolder.mkdirs();
     }
 	
     public void initBrowser() {
     	_driver = new FirefoxDriver(_ffOptions);
-//    	_driver = new ChromeDriver(_crOptions);
+    	//_driver = new ChromeDriver(_crOptions);
     	_parser = new HtmlParser(_driver);
         _uiSpacing = getBrowserUiSpacing();
         _LOG.info("UI spacing is: " + _uiSpacing.width + "x" + _uiSpacing.height);
         _driver.manage().window().maximize();
         this.openURL(_baseUrl);
+        prepareNextFavicon();
+        updateIndexHtml();
     }
     
     public void restartHeadlessBrowser() {
@@ -117,7 +140,7 @@ public class BrowserController {
     public void navigateBack() {
     	_driver.navigate().back();
     }
-	
+    	
     /**
      * Connects to a given url
      * @param baseURL the host to connect to
@@ -251,7 +274,7 @@ public class BrowserController {
      * @param clientWidth the width that the client has, and that the browser should take
      * @param clientHeight the height that the client has, and that the browser should take
      */
-    private void setBrowserToViewportDimension(boolean windowSizeChanged, int clientWidth, int clientHeight) {
+     void setBrowserToViewportDimension(boolean windowSizeChanged, int clientWidth, int clientHeight) {
     	int newWidth = clientWidth + _uiSpacing.width;
     	int newHeight = clientHeight + _uiSpacing.height;
     	if (windowSizeChanged) {
@@ -265,7 +288,7 @@ public class BrowserController {
 		        return String.valueOf(js.executeScript("return document.readyState")).equals("complete");
 		    }
 		});
-    	
+			
         int inflatedHeight = Integer.parseInt(js.executeScript("return document.documentElement.scrollHeight;").toString());
         inflatedHeight = inflatedHeight + _uiSpacing.height;
         _driver.manage().window().setSize(new Dimension(newWidth, inflatedHeight));
@@ -303,40 +326,85 @@ public class BrowserController {
     }
 
     public void updateTitleAndUrlAndFavicon(boolean needsReset) {
-		_pagePath = getPagePath();	
-		
+    	
+    	// Avoid issues with multithreading.
+    	while(_isExecuting) {
+    		try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    	}
+    	_isExecuting = true;
+    	
 		if (needsReset) {
-			ServerWebSocket.sendControlMessage("R:ResetCmd");	
-			ServerWebSocket.sendControlMessage("P:" + _pagePath);
+			updateIndexHtml();
+			ServerWebSocket.sendControlMessage("R:ResetCmd");
+			ServerWebSocket.sendControlMessage("P:" + getPagePath());
 		} else {
-		    _faviconUrl = FileUtil.getFavicon(this, _driver);
-        	String _localFaviconUrl = prepareLocalFavicon(_faviconUrl);
-    		_title = getTitle();
-    		ServerWebSocket.sendControlMessage("T:" + _title);
-            ServerWebSocket.sendControlMessage("F:" + _localFaviconUrl);
+    		ServerWebSocket.sendControlMessage("T:" + getTitle());
+    		//String faviconUrl = FileUtil.getFavicon(this, _driver);
+        	//prepareFavicon(faviconUrl);
+    	    //updateIndexHtml();
 		}
+		_isExecuting = false;
     }
     
-    private String prepareLocalFavicon(String url) {
-    	String localFile = convertPathFromRemoteToLocal(url);
-    	String localURL = "http://127.0.0.1:8080/" + localFile;
+    public void prepareNextFavicon() {
+    	String faviconUrl = FileUtil.getFavicon(this, _driver);
+    	prepareFavicon(faviconUrl);
+    }
+       
+    private void updateIndexHtml()  {
+    	File file = new File(FileUtil.getFullyQualifiedHttpServerRoot() + "index.html");
+    	char[] buffer = new char[50000];
+    	try {
+			FileReader fr = new FileReader(file);
+			try {
+				fr.read(buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				fr.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+    	String fileContent = new String(buffer);
+    	String newFileContent = "";
+    	Pattern p = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + "\\d+\\" + ".ico\"/>");
+    	if(_initialCall) {
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + 0 + ".ico\"/>");
+    		_initialCall = false;
+    	} else {
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + _websiteMappings.size() + ".ico\"/>");
+    	}
+		try {
+			FileWriter fw = new FileWriter(file);
+			fw.write(newFileContent);
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+    }
+        
+    private void prepareFavicon(String url) {
+    	_faviconID = _websiteMappings.size();
+    	this._websiteMappings.put(_faviconID, url);
+    	String localIcon = _faviconID + ".ico";
     	InputStream in;
 		try {
 			in = new URL(url).openStream();
-			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot() + localFile), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot(), localIcon), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return localURL;
     }
-    
-    private String convertPathFromRemoteToLocal(String url) {
-    	int currentWebsiteViewCount = _websiteMappings.size();
-    	this._websiteMappings.put(currentWebsiteViewCount, url);
-    	return currentWebsiteViewCount + ".ico";
-    }
-    
+        
     private void initScreenshotReplyManager() {
     	for (int i = 0; i < Configuration.PARAM_NUMBER_SCREENSHOT_THREADS; i++) {
     		spawnScreenshotThread();
@@ -442,5 +510,25 @@ public class BrowserController {
     
     public List<TextBox> getDrawableTextboxes() {
     	return _parser.getTextboxes();
+    }
+    
+    public void dimensionCheck() {
+    	Dimension d = null;
+    	try {
+    		d = ServerWebSocket.getClientDimension();
+    		Thread.sleep(50);
+
+    		if (d != null) {
+    			int width = d.getWidth();
+    			int height = d.getHeight();
+
+    			boolean uiChangeOccurred = true;
+    			if (uiChangeOccurred) {
+    				_clientWindowWidth = width;
+    				_clientWindowHeight = height;
+    				setBrowserToViewportDimension(uiChangeOccurred, width, height);
+    			}
+    		}
+    	} catch (Exception e) {}
     }
 }
