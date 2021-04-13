@@ -63,6 +63,7 @@ public class BrowserController {
     private boolean _isExecuting = false;
     private boolean _initialCall = true;
     private SecureRandom _random = new SecureRandom();
+    private int _currentFaviconID = -1;
     
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
@@ -147,7 +148,7 @@ public class BrowserController {
      * @param path the path at given host to connect to
      */
     public void openURL (String baseURL) {
-        _driver.get(_baseUrl);
+        _driver.get(baseURL);
     }
 
     public void performMouseClick(int x, int y) {
@@ -352,9 +353,9 @@ public class BrowserController {
     
     public int prepareNextFavicon() {
     	String faviconUrl = FileUtil.getFavicon(this, _driver);
-    	int _faviconID = _random.nextInt(42000);
-    	this._websiteMappings.put(_faviconID, faviconUrl);
-    	String localIcon = _faviconID + ".ico";
+    	_currentFaviconID = _random.nextInt(42000);
+    	this._websiteMappings.put(_currentFaviconID, _driver.getCurrentUrl());
+    	String localIcon = _currentFaviconID + ".ico";
     	InputStream in;
 		try {
 			in = new URL(faviconUrl).openStream();
@@ -363,7 +364,7 @@ public class BrowserController {
 			e.printStackTrace();
 		}
 		
-		return _faviconID;
+		return _currentFaviconID;
     }
        
     private void updateIndexHtml(int currentFaviconValue)  {
@@ -531,6 +532,9 @@ public class BrowserController {
     }
 
 	public void navigateTo(int faviconId) {
-		this.openURL(_websiteMappings.get(faviconId));
+		if (_currentFaviconID != faviconId) {
+			System.out.println("navigate to: " + _websiteMappings.get(faviconId));
+			this.openURL(_websiteMappings.get(faviconId));
+		}
 	}
 }

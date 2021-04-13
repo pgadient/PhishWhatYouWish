@@ -103,9 +103,12 @@ public class WebSocketControl extends WebSocketApplication {
 			break;
 		case 'A':
 			_controller.dimensionCheck();
+			break;
 		case 'F':	
 			int faviconId = Integer.valueOf(originalMessage);
+			//System.out.println("received " + originalMessage);
 			_controller.navigateTo(faviconId);
+			break;
 		}
 	}
 
