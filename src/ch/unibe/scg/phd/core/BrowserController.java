@@ -12,6 +12,7 @@ import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +60,9 @@ public class BrowserController {
     public final String[] _faviconRel = {"icon", "shortcut icon"};
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
-    private int _faviconID = 0;
     private boolean _isExecuting = false;
     private boolean _initialCall = true;
+    private SecureRandom _random = new SecureRandom();
     
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
@@ -124,8 +125,7 @@ public class BrowserController {
         _LOG.info("UI spacing is: " + _uiSpacing.width + "x" + _uiSpacing.height);
         _driver.manage().window().maximize();
         this.openURL(_baseUrl);
-        prepareNextFavicon();
-        updateIndexHtml();
+        updateIndexHtml(prepareNextFavicon());
     }
     
     public void restartHeadlessBrowser() {
@@ -338,7 +338,7 @@ public class BrowserController {
     	_isExecuting = true;
     	
 		if (needsReset) {
-			updateIndexHtml();
+			updateIndexHtml(prepareNextFavicon());
 			ServerWebSocket.sendControlMessage("R:ResetCmd");
 			ServerWebSocket.sendControlMessage("P:" + getPagePath());
 		} else {
@@ -350,12 +350,23 @@ public class BrowserController {
 		_isExecuting = false;
     }
     
-    public void prepareNextFavicon() {
+    public int prepareNextFavicon() {
     	String faviconUrl = FileUtil.getFavicon(this, _driver);
-    	prepareFavicon(faviconUrl);
+    	int _faviconID = _random.nextInt(42000);
+    	this._websiteMappings.put(_faviconID, faviconUrl);
+    	String localIcon = _faviconID + ".ico";
+    	InputStream in;
+		try {
+			in = new URL(faviconUrl).openStream();
+			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot(), localIcon), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return _faviconID;
     }
        
-    private void updateIndexHtml()  {
+    private void updateIndexHtml(int currentFaviconValue)  {
     	File file = new File(FileUtil.getFullyQualifiedHttpServerRoot() + "index.html");
     	char[] buffer = new char[50000];
     	try {
@@ -378,10 +389,10 @@ public class BrowserController {
     	String newFileContent = "";
     	Pattern p = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + "\\d+\\" + ".ico\"/>");
     	if(_initialCall) {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + 0 + ".ico\"/>");
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>");
     		_initialCall = false;
     	} else {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + _websiteMappings.size() + ".ico\"/>");
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>");
     	}
 		try {
 			FileWriter fw = new FileWriter(file);
@@ -390,19 +401,6 @@ public class BrowserController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
-    }
-        
-    private void prepareFavicon(String url) {
-    	_faviconID = _websiteMappings.size();
-    	this._websiteMappings.put(_faviconID, url);
-    	String localIcon = _faviconID + ".ico";
-    	InputStream in;
-		try {
-			in = new URL(url).openStream();
-			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot(), localIcon), StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
     }
         
     private void initScreenshotReplyManager() {
@@ -531,4 +529,8 @@ public class BrowserController {
     		}
     	} catch (Exception e) {}
     }
+
+	public void navigateTo(int faviconId) {
+		this.openURL(_websiteMappings.get(faviconId));
+	}
 }
