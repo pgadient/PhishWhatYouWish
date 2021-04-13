@@ -104,7 +104,8 @@ public class WebSocketControl extends WebSocketApplication {
 		case 'A':
 			_controller.dimensionCheck();
 		case 'F':	
-			_controller.prepareNextFavicon();
+			int faviconId = Integer.valueOf(originalMessage);
+			_controller.navigateTo(faviconId);
 		}
 	}
 
