@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -37,7 +36,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
-
 import ch.unibe.scg.phd.communication.ServerWebSocket;
 import ch.unibe.scg.phd.data.overlays.Clickable;
 import ch.unibe.scg.phd.data.overlays.TextBox;
@@ -101,21 +99,7 @@ public class BrowserController {
 		_crOptions.addArguments("--no-sandbox");
         */
         
-        createFaviconFolder();
-        //updateIndexHtml();
         initBrowser();
-    }
-    
-    public void createFaviconFolder() {
-    	File faviconFolder = new File(FileUtil.getFullyQualifiedHttpServerRoot() + "favicons");
-    	if(faviconFolder.exists()) {
-        	try {
-				FileUtils.deleteDirectory(faviconFolder);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
-        faviconFolder.mkdirs();
     }
 	
     public void initBrowser() {
@@ -344,9 +328,6 @@ public class BrowserController {
 			ServerWebSocket.sendControlMessage("P:" + getPagePath());
 		} else {
     		ServerWebSocket.sendControlMessage("T:" + getTitle());
-    		//String faviconUrl = FileUtil.getFavicon(this, _driver);
-        	//prepareFavicon(faviconUrl);
-    	    //updateIndexHtml();
 		}
 		_isExecuting = false;
     }
@@ -390,10 +371,10 @@ public class BrowserController {
     	String newFileContent = "";
     	Pattern p = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + "\\d+\\" + ".ico\"/>");
     	if(_initialCall) {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>");
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>").strip();
     		_initialCall = false;
     	} else {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>");
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>").strip();
     	}
 		try {
 			FileWriter fw = new FileWriter(file);
@@ -436,16 +417,13 @@ public class BrowserController {
 							}
 							
 							boolean urlChangeOccurred = urlHasChanged();
-							//_LOG.warn("url/ui: " + urlChangeOccurred + " / " + uiChangeOccurred);
 							if (urlChangeOccurred) {
 								updateTitleAndUrlAndFavicon(true);
 								injectNativeControls();
 							}
-	
 							// Google Chrome webdriver needs scrolling for full capture
 							// unavailable full page screenshots are a won't fix issue: 
 							// https://bugs.chromium.org/p/chromedriver/issues/detail?id=294
-//							byte[] image = Shutterbug.shootPage(_driver, Capture.FULL, true).getBytes();
 							byte[] image = FileUtil.takeScreenshot(_driver);
 							
 							ServerWebSocket.sendImage(image);
@@ -460,9 +438,7 @@ public class BrowserController {
     public void injectNativeControls() {
     	Runnable rClickables = new Runnable() {
 			@Override
-			public void run() {
-//				ServerWebSocket.sendControlMessage("Y:busy");
-				
+			public void run() {			
 				List<Clickable> clickables = _parser.getClickables();
 		    	for (Clickable c : clickables) {
 		    		Point l = c.getLocation(); // location
@@ -486,8 +462,6 @@ public class BrowserController {
 		    		tConfig.append(t.getFontColor()).append("|!|").append(t.getFontFamily()).append("|!|").append(t.getFontSize()).append("|!|").append(t.getFontStyle()).append("|!|").append(t.getFontWeight());
 					ServerWebSocket.sendControlMessage("I:" + tConfig.toString());
 				}
-		    	
-//		    	ServerWebSocket.sendControlMessage("Z:endbusy");
 			}};
     	Thread tClickables = new Thread(rClickables);
     	tClickables.start();
@@ -516,19 +490,16 @@ public class BrowserController {
     	try {
     		d = ServerWebSocket.getClientDimension();
     		Thread.sleep(50);
-
     		if (d != null) {
     			int width = d.getWidth();
     			int height = d.getHeight();
-
-    			boolean uiChangeOccurred = true;
-    			if (uiChangeOccurred) {
-    				_clientWindowWidth = width;
-    				_clientWindowHeight = height;
-    				setBrowserToViewportDimension(uiChangeOccurred, width, height);
-    			}
+    			_clientWindowWidth = width;
+    			_clientWindowHeight = height;
+    			setBrowserToViewportDimension(true, width, height);
     		}
-    	} catch (Exception e) {}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     }
 
 	public void navigateTo(int faviconId) {

@@ -95,7 +95,7 @@ public class WebSocketControl extends WebSocketApplication {
 			break;
 		case 'V': // received back button event
 			_LOG.warn("Received back event.");
-//			_controller.navigateBack();
+			_controller.navigateBack();
 			break;
 		case 'W': // received forward button event
 			_LOG.warn("Received forward event.");
@@ -106,7 +106,6 @@ public class WebSocketControl extends WebSocketApplication {
 			break;
 		case 'F':	
 			int faviconId = Integer.valueOf(originalMessage);
-			//System.out.println("received " + originalMessage);
 			_controller.navigateTo(faviconId);
 			break;
 		}
