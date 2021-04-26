@@ -35,7 +35,6 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.io.FileUtils;
 import ch.unibe.scg.phd.communication.ServerWebSocket;
 import ch.unibe.scg.phd.data.overlays.Clickable;
 import ch.unibe.scg.phd.data.overlays.TextBox;
@@ -79,11 +78,15 @@ public class BrowserController {
     	
     	//Firefox set up
     	System.setProperty(Configuration.FIREFOX_DRIVER, FileUtil.getFullyQualifiedDriverPath(FileUtil.getAppropriateDriver("firefox")));
-        _ffOptions = new FirefoxOptions();
         FirefoxProfile firefoxProfile = new FirefoxProfile();
         if (adblock){
             firefoxProfile.addExtension(new File(FileUtil.getFullyQualifiedExtensionsPath(Configuration.FIREFOX_EXTENSION_ADBLOCKPLUS)));
         }
+
+        // switches sites to German as default
+        firefoxProfile.setPreference("intl.accept_languages", "de-DE, de");
+        
+        _ffOptions = new FirefoxOptions();
         _ffOptions.setProfile(firefoxProfile);
         if (headless) {
             FirefoxBinary firefoxBinary = new FirefoxBinary();

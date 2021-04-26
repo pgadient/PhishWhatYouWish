@@ -2,6 +2,9 @@ package ch.unibe.scg.phd.properties;
 
 public class Configuration {
 
+	// Login string for selfservice.unibe.ch
+	// https://www.selfservice.studis.unibe.ch/Shibboleth.sso/Login?SAMLDS=1&target=https%3A%2F%2Fwww.selfservice.studis.unibe.ch%2Flogin.html%3Ftx_sraguser_pi1%5Baction%5D%3Dauth%26amp%3Btx_sraguser_pi1%5Bcontroller%5D%3DUser&entityID=https%3A%2F%2Faai-idp.unibe.ch%2Fidp%2Fshibboleth
+	
 	public static final String PATH_STATIC_HTML = "/ch/unibe/scg/phd/staticHtml/";
 	public static final String PATH_STATIC_HTML_INDEX = "index.html";
 	public static final String PATH_DRIVERS = "/ch/unibe/scg/phd/webdrivers/";
