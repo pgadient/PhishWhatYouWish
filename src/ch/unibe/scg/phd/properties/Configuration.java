@@ -36,7 +36,7 @@ public class Configuration {
     public static final String PARAM_FAVICONS_BASE_PATH_DEFAULT = "./favicons/default/";
     public static final String PARAM_FAVICON_NAME = "favicon.png";
     
-	public static final int TEXTBOX_X_OFFSET = 4;
-	public static final int TEXTBOX_HEIGHT_OFFSET = -4;
+	public static final int TEXTBOX_X_OFFSET = 0; // 4 for SCG website
+	public static final int TEXTBOX_HEIGHT_OFFSET = 0; // -4 for SCG website
 	
 }
