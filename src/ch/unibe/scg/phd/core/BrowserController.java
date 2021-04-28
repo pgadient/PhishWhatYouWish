@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -62,8 +64,15 @@ public class BrowserController {
     private SecureRandom _random = new SecureRandom();
     private int _currentFaviconID = -1;
     
+    Thread _driverHook = new Thread(() -> {
+    	if(FileUtil.getOS().equals("Windows32") || FileUtil.getOS().equals("Windows62")) {
+    		_LOG.warn("Quitting driver");
+    		_driver.quit();
+    	}
+    });
     
     public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
+    	Runtime.getRuntime().addShutdownHook(_driverHook);
     	// stripping leading and trailing dashes from URL
     	while (baseUrl.startsWith("/")) {
             baseUrl = baseUrl.substring(1);
@@ -71,7 +80,7 @@ public class BrowserController {
         while (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
-        
+
     	_baseUrl = baseUrl;
     	_sleeper = new Sleeper();
     	initScreenshotReplyManager();
@@ -102,7 +111,20 @@ public class BrowserController {
 		_crOptions.addArguments("--no-sandbox");
         */
         
+        initFaviconFolder();
         initBrowser();
+    }
+    
+    private void initFaviconFolder() {
+    	File faviconFolder = new File(FileUtil.getFullyQualifiedHttpServerRoot() + "favicons");
+    	if(faviconFolder.exists()) {
+    		try {
+				FileUtils.deleteDirectory(faviconFolder);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
+    	faviconFolder.mkdirs();
     }
 	
     public void initBrowser() {
@@ -343,7 +365,7 @@ public class BrowserController {
     	InputStream in;
 		try {
 			in = new URL(faviconUrl).openStream();
-			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot(), localIcon), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(in, Paths.get(FileUtil.getFullyQualifiedHttpServerRoot(), "favicons", localIcon), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -372,13 +394,14 @@ public class BrowserController {
 		}
     	String fileContent = new String(buffer);
     	String newFileContent = "";
-    	Pattern p = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + "\\d+\\" + ".ico\"/>");
+    	Pattern p = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/favicons/" + "\\d+\\" + ".ico\"/>");
     	if(_initialCall) {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>").strip();
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/favicons/" + currentFaviconValue + ".ico\"/>").strip();
     		_initialCall = false;
     	} else {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/" + currentFaviconValue + ".ico\"/>").strip();
+    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/favicons/" + currentFaviconValue + ".ico\"/>").strip();
     	}
+    	newFileContent = newFileContent.split("<!--End of file-->")[0] + "<!--End of file-->";
 		try {
 			FileWriter fw = new FileWriter(file);
 			fw.write(newFileContent);

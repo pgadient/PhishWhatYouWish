@@ -67,6 +67,10 @@ public class FileUtil {
     	}
     }
     
+    public static String getOS() {
+    	return _OSTYPE;
+    }
+    
     
 	/**
 	 * Returns if the application is started from a runnable JAR or via class files.
