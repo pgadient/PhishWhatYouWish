@@ -478,7 +478,7 @@ public class BrowserController {
 		    		Dimension d = t.getDimension();
 		    		StringBuilder tConfig = new StringBuilder();
 		    		tConfig.append(l.x + Configuration.TEXTBOX_X_OFFSET).append(",").append(l.y).append("||");
-		    		tConfig.append(d.width).append(",").append(d.height + Configuration.TEXTBOX_HEIGHT_OFFSET).append("||");
+		    		tConfig.append(d.width + Configuration.TEXTBOX_WIDTH_OFFSET).append(",").append(d.height + Configuration.TEXTBOX_HEIGHT_OFFSET).append("||");
 		    		tConfig.append(t.getType()).append("||");
 		    		tConfig.append(t.getBackground()).append("||");
 		    		tConfig.append(t.getPlaceholder()).append("||");
