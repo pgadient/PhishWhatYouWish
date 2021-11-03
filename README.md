@@ -16,14 +16,12 @@ Since the tool creates temporary folders at the execution path for the built-in 
 The phished website can then be accessed at:
 `http://localhost:8080`
 
-### Supported browser configurations
-The application has been optimized for Firefox desktop clients on non-retina displays.
-Nevertheless, the application should work on every other major browser client, although minor visual glitches could occur more frequently.
-
-### The application supports the following OSes:
-- Windows (x86 and x64)
-- MacOS
-- Most Debian-based Linux OSes (x86 and x64)
+### System requirements
+- Windows (x86 and x64), MacOS, or most Debian-based Linux OSes (x86 and x64)
+- An installed recent version of Mozilla Firefox
+- A non-retina display (retina displays may suffer from visual glitches)
+- OpenJDK 11 or higher
+- Security permissions to access ports on localhost (relevant network firewall dialogs depend on the OS and should pop up automatically)
 
 ### Supported features
 - Mouse clicks (currently only left button)
@@ -44,17 +42,12 @@ Nevertheless, the application should work on every other major browser client, a
 -	Resolutions other than 1920 x 1080 at 100% scaling
 -	Pop-up windows 
 
-### The Java application requires
-- An installed recent version of Mozilla Firefox
-- OpenJDK 11 or higher
-- Security permissions to access ports on localhost (relevant network firewall dialogs depend on the OS)
-
 ### Command-line arguments
 java -jar PhishingServer.jar [hideHeadlessBrowser?] [enableAdBlockPlugin?] [provideDebugOutput?] URL_to_phish
 Example (starts a server with a visible headless browser, enabled ad-blocking and debug console output):
 java -jar PhishingServer.jar false true true "https://www.google.com/" (NB: this is the default configuration)
 
-### Troubleshooting
+## Troubleshooting
 If problems occur during start-up, please ensure:
 - the requirements are met
 - you use the full hd screen resolution (1920x1080, 100% scaling)
