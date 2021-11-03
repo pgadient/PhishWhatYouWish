@@ -43,9 +43,13 @@ The phished website can then be accessed at:
 -	Pop-up windows 
 
 ### Command-line arguments
-java -jar PhishingServer.jar [hideHeadlessBrowser?] [enableAdBlockPlugin?] [provideDebugOutput?] URL_to_phish
-Example (starts a server with a visible headless browser, enabled ad-blocking and debug console output):
-java -jar PhishingServer.jar false true true "https://www.google.com/" (NB: this is the default configuration)
+`java -jar PhishingServer.jar [hideHeadlessBrowser?] [enableAdBlockPlugin?] [provideDebugOutput?] URL_to_phish`
+
+Example:
+`java -jar PhishingServer.jar false true true "https://www.google.com/"`
+
+The command above starts a phishing server with a visible headless browser, enabled ad-blocking and debug console output.
+NB: This is the default configuration.
 
 ## Troubleshooting
 If problems occur during start-up, please ensure:
