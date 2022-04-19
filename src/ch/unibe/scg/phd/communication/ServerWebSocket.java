@@ -2,6 +2,8 @@ package ch.unibe.scg.phd.communication;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.ssl.SSLContextConfigurator;
+import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.openqa.selenium.Dimension;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import ch.unibe.scg.phd.communication.wsApplications.WebSocketControl;
 import ch.unibe.scg.phd.communication.wsApplications.WebSocketScreenshots;
 import ch.unibe.scg.phd.core.BrowserController;
+import ch.unibe.scg.phd.properties.Configuration;
+import ch.unibe.scg.phd.utils.FileUtil;
 
 public class ServerWebSocket {
 	
@@ -18,12 +22,16 @@ public class ServerWebSocket {
 	private static WebSocketControl _CONTROL_APPLICATION = null;
 	private static WebSocketScreenshots _SCREENSHOT_APPLICATION = null;
 
-	public static void start(BrowserController controller) {
+	public static void start(BrowserController controller, boolean useHTTPS) {
 		
 		final HttpServer server = HttpServer.createSimpleServer(null, 8081);
 		final WebSocketAddOn addon = new WebSocketAddOn();
 		for (NetworkListener listener : server.getListeners()) {
 		    listener.registerAddOn(addon);
+		    if (useHTTPS) {
+		    	listener.setSSLEngineConfig(initializeSSL());
+		    	listener.setSecure(true);
+		    }
 		}
 		
 		_CONTROL_APPLICATION = new WebSocketControl(controller);
@@ -69,4 +77,14 @@ public class ServerWebSocket {
 	public static void setNewlyConnected(boolean newState) {
 		_CONTROL_APPLICATION.setFirstConnectState(newState);
 	}
+	
+	private static SSLEngineConfigurator initializeSSL() {
+        SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
+        sslContextConfig.setTrustStoreFile(FileUtil.identifyCertsFile("WS"));
+        sslContextConfig.setTrustStorePass(Configuration.KEYSTORE_DEFAULT_PASSWORD);
+        sslContextConfig.setKeyStoreFile(FileUtil.identifyKeystoreFile("WS"));
+        sslContextConfig.setKeyStorePass(Configuration.KEYSTORE_DEFAULT_PASSWORD);
+
+        return new SSLEngineConfigurator(sslContextConfig.createSSLContext(true), false, false, false);
+    }
 }

@@ -1,7 +1,7 @@
 package ch.unibe.scg.phd.core;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
@@ -60,9 +59,11 @@ public class BrowserController {
     private int _clientWindowWidth = 0;
     private int _clientWindowHeight = 0;
     private boolean _isExecuting = false;
-    private boolean _initialCall = true;
     private SecureRandom _random = new SecureRandom();
     private int _currentFaviconID = -1;
+    private String _protocolInUse = "";
+    private String _currentHost = "";
+    private boolean _isInitialPass = true;
     
     Thread _driverHook = new Thread(() -> {
     	if(FileUtil.getOS().equals("Windows32") || FileUtil.getOS().equals("Windows62")) {
@@ -71,7 +72,7 @@ public class BrowserController {
     	}
     });
     
-    public BrowserController(String baseUrl, boolean headless, boolean adblock, boolean debug) {
+    public BrowserController(String baseUrl, String host, boolean headless, boolean adblock, boolean debug, boolean https) {
     	Runtime.getRuntime().addShutdownHook(_driverHook);
     	// stripping leading and trailing dashes from URL
     	while (baseUrl.startsWith("/")) {
@@ -112,6 +113,13 @@ public class BrowserController {
         */
         
         initFaviconFolder();
+
+        if (https) {
+        	_protocolInUse = "https";
+        } else {
+        	_protocolInUse = "http";
+        }
+        _currentHost = host;
         initBrowser();
     }
     
@@ -373,38 +381,63 @@ public class BrowserController {
 		return _currentFaviconID;
     }
        
-    private void updateIndexHtml(int currentFaviconValue)  {
+    private void updateIndexHtml(int currentFaviconValue) {
     	File file = new File(FileUtil.getFullyQualifiedHttpServerRoot() + "index.html");
-    	char[] buffer = new char[50000];
+		StringBuffer sb = new StringBuffer(15000);
     	try {
-			FileReader fr = new FileReader(file);
-			try {
-				fr.read(buffer);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				fr.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+    		FileReader fr = new FileReader(file);
+    		BufferedReader br = new BufferedReader(fr);
+
+    		int currentLine = 1;
+    		while (br.ready()) {
+    			String line = br.readLine() + "\n";
+    			if (currentLine == 7) {
+    				sb.append("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"" + _protocolInUse + "://" + _currentHost + "/favicons/" + currentFaviconValue + ".ico\"/>\n");
+    			} else if (_isInitialPass && currentLine == 23) {
+    				if (_protocolInUse.equals("https")) {
+    					sb.append("var socketC = new WebSocket(\"wss://\" + currentHostName + secondPort + \"control\");\n");
+    				} else {
+    					sb.append("var socketC = new WebSocket(\"ws://\" + currentHostName + secondPort + \"control\");\n");
+    				}
+    			} else if (_isInitialPass && currentLine == 25) {
+       				if (_protocolInUse.equals("https")) {
+    					sb.append("var socket = new WebSocket(\"wss://\" + currentHostName + secondPort + \"screenshots\");\n");
+    				} else {
+    					sb.append("var socket = new WebSocket(\"ws://\" + currentHostName + secondPort + \"screenshots\");\n");
+    				}
+    			} else if (_isInitialPass && currentLine == 116) {
+       				if (_protocolInUse.equals("https")) {
+    					sb.append("window.location.href = \"https://\" + currentHostName + firstPort + originalMessage;\n");
+    				} else {
+    					sb.append("window.location.href = \"http://\" + currentHostName + firstPort + originalMessage;\n");
+    				}
+    				_isInitialPass = false;
+    			} else {
+    				sb.append(line);
+    			}
+    			currentLine++;
+    		}
+    		
+			br.close();
+			fr.close();
 			
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    	String fileContent = new String(buffer);
-    	String newFileContent = "";
-    	Pattern p = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/favicons/" + "\\d+\\" + ".ico\"/>");
-    	if(_initialCall) {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/favicons/" + currentFaviconValue + ".ico\"/>").strip();
-    		_initialCall = false;
-    	} else {
-    		newFileContent = p.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"http://localhost:8080/favicons/" + currentFaviconValue + ".ico\"/>").strip();
-    	}
-    	newFileContent = newFileContent.split("<!--End of file-->")[0] + "<!--End of file-->";
-		try {
+//    	String fileContent = new String(buffer);
+//    	Pattern pFavicon = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\".*://.*/favicons/" + "\\d+\\" + ".ico\"/>");
+//    	String newFileContent = pFavicon.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"" + _protocolInUse + "://" + _currentHost + "/favicons/" + currentFaviconValue + ".ico\"/>").strip();
+//    	newFileContent = newFileContent.split("<!--End of file-->")[0] + "<!--End of file-->";
+
+//    	if (_isInitialPass) {
+//    		_isInitialPass = false;
+//    		Pattern pWebsocket = Pattern.compile("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\".*://.*/favicons/" + "\\d+\\" + ".ico\"/>");
+//        	String newFileContent = pFavicon.matcher(fileContent).replaceFirst("<link rel=\"shortcut icon\" type=\"image/jpg\" href=\"" + _protocolInUse + "://" + _currentHost + "/favicons/" + currentFaviconValue + ".ico\"/>").strip();
+//    	}
+    	
+    	try {
 			FileWriter fw = new FileWriter(file);
-			fw.write(newFileContent);
+			fw.write(sb.toString());
 			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -416,7 +449,7 @@ public class BrowserController {
     		spawnScreenshotThread();
 		}
     	
-    	_LOG.warn("Spawned " + Configuration.PARAM_NUMBER_SCREENSHOT_THREADS + " screenshot threads.");
+    	_LOG.warn("[EXEC] Spawned " + Configuration.PARAM_NUMBER_SCREENSHOT_THREADS + " screenshot threads.");
     }
     
     private void spawnScreenshotThread() {
@@ -477,7 +510,7 @@ public class BrowserController {
 		    		Point l = t.getLocation();
 		    		Dimension d = t.getDimension();
 		    		StringBuilder tConfig = new StringBuilder();
-		    		tConfig.append(l.x + Configuration.TEXTBOX_X_OFFSET).append(",").append(l.y).append("||");
+		    		tConfig.append(l.x + Configuration.TEXTBOX_X_OFFSET).append(",").append(l.y + Configuration.TEXTBOX_Y_OFFSET).append("||");
 		    		tConfig.append(d.width + Configuration.TEXTBOX_WIDTH_OFFSET).append(",").append(d.height + Configuration.TEXTBOX_HEIGHT_OFFSET).append("||");
 		    		tConfig.append(t.getType()).append("||");
 		    		tConfig.append(t.getBackground()).append("||");

@@ -87,7 +87,7 @@ public class FileUtil {
 			return true;
 		}
 	}
-    
+	
     public static String getFullyQualifiedFilePath(String relativeFilePath) {
     	String url = null;
     	if (_STARTED_AS_JAR) {
@@ -161,9 +161,11 @@ public class FileUtil {
     		File f1 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/extensions");
 	    	File f2 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/webdrivers");
 	    	File f3 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/wwwroot");
+	    	File f4 = new File(System.getProperty("user.dir") + "/PhishingOnDemand/certificate");
 	    	f1.mkdirs();
 	    	f2.mkdirs();
 	    	f3.mkdirs();
+	    	f4.mkdirs();
 	    	_LOG.warn("Created temp folders.");
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN64, true);
 	    	copyFile(Configuration.PATH_DRIVERS, "/PhishingOnDemand/webdrivers/", Configuration.FIREFOX_DRIVER_WIN32, true);
@@ -181,6 +183,10 @@ public class FileUtil {
 	    	_LOG.warn("Extracted browser extensions.");
 	    	copyFile(Configuration.PATH_STATIC_HTML, "/PhishingOnDemand/wwwroot/", Configuration.PATH_STATIC_HTML_INDEX, false);
 	    	_LOG.warn("Extracted static HTML content.");
+	    	copyFile(Configuration.PATH_STATIC_CERTS, "/PhishingOnDemand/certificate/", Configuration.PATH_STATIC_CERTS_DEFAULT_CERTSFILE, false);
+	    	_LOG.warn("Extracted static HTTPS certificate content.");
+	    	copyFile(Configuration.PATH_STATIC_CERTS, "/PhishingOnDemand/certificate/", Configuration.PATH_STATIC_CERTS_DEFAULT_KEYSTORE, false);
+	    	_LOG.warn("Extracted static HTTPS keystore content.");
     	}
     }
     
@@ -217,6 +223,14 @@ public class FileUtil {
 		return "";
     }
 
+    public static String getFullyQualifiedCertificatePath() {
+    	if (_STARTED_AS_JAR) {
+    		return System.getProperty("user.dir") + "/PhishingOnDemand/certificate/";
+    	} else {
+    		return System.getProperty("user.dir") + "/src" + Configuration.PATH_STATIC_CERTS;
+    	}
+    }
+    
     public static String getFullyQualifiedDriverPath(String fileName) {
     	if (_STARTED_AS_JAR) {
     		return System.getProperty("user.dir") + "/PhishingOnDemand/webdrivers/" + fileName;
@@ -275,6 +289,31 @@ public class FileUtil {
     			return Configuration.CHROME_DRIVER_LIN32;
     		}
     	}
-    	
+    }
+    
+    public static String identifyCertsFile(String kind) {
+    	String customCertsFilePath = FileUtil.getFullyQualifiedCertificatePath() + Configuration.PATH_STATIC_CERTS_USER_CERTSFILE;
+    	if (new File(customCertsFilePath).exists()) {
+    		_LOG.warn("[HTTPS " + kind + "] Custom certificate file found!");
+    		return customCertsFilePath;
+    	} else {
+    		_LOG.warn("[HTTPS " + kind + "] No custom certs file \"" + Configuration.PATH_STATIC_CERTS_USER_CERTSFILE + "\" found in certificate folder. Using built-in default certs file.");
+    		_LOG.warn("[HTTPS] Secure web sockets may require the web browser to have a valid certificate chain.");
+    		_LOG.warn("[HTTPS] Please use HTTP if you do not have valid certificates and encounter any problems.");
+    		return FileUtil.getFullyQualifiedCertificatePath() + Configuration.PATH_STATIC_CERTS_DEFAULT_CERTSFILE;
+    	}
+    }
+    
+    public static String identifyKeystoreFile(String kind) {
+    	String customKeystoreFilePath = FileUtil.getFullyQualifiedCertificatePath() + Configuration.PATH_STATIC_CERTS_USER_KEYSTORE;
+    	if (new File(customKeystoreFilePath).exists()) {
+    		_LOG.warn("[HTTPS " + kind + "] Custom keystore file found!");
+    		return customKeystoreFilePath;
+    	} else {
+    		_LOG.warn("[HTTPS " + kind + "] No custom keystore file \"" + Configuration.PATH_STATIC_CERTS_USER_KEYSTORE + "\" found in certificate folder. Using built-in default keystore file.");
+    		_LOG.warn("[HTTPS] Secure web sockets may require the web browser to have a valid certificate chain.");
+    		_LOG.warn("[HTTPS] Please use HTTP if you do not have valid certificates and encounter any problems.");
+    		return FileUtil.getFullyQualifiedCertificatePath() + Configuration.PATH_STATIC_CERTS_DEFAULT_KEYSTORE;
+    	}
     }
 }

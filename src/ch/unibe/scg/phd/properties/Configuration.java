@@ -9,6 +9,12 @@ public class Configuration {
 	public static final String PATH_STATIC_HTML_INDEX = "index.html";
 	public static final String PATH_DRIVERS = "/ch/unibe/scg/phd/webdrivers/";
 	public static final String PATH_BROWSER_EXTENSIONS = "/ch/unibe/scg/phd/extensions/";
+	public static final String PATH_STATIC_CERTS = "/ch/unibe/scg/phd/certificate/";
+	public static final String PATH_STATIC_CERTS_DEFAULT_CERTSFILE = "ssltest-cacerts.jks";
+	public static final String PATH_STATIC_CERTS_DEFAULT_KEYSTORE = "ssltest-keystore.jks";
+	public static final String PATH_STATIC_CERTS_USER_CERTSFILE = "cacerts.jks";
+	public static final String PATH_STATIC_CERTS_USER_KEYSTORE = "keystore.jks";
+	public static final String KEYSTORE_DEFAULT_PASSWORD = "changeit";
 	
 	public static final String FIREFOX_DRIVER = "webdriver.gecko.driver";
 	public static final String FIREFOX_DRIVER_WIN64 = "geckodriver-v0.27.0-win64.exe";
@@ -37,8 +43,9 @@ public class Configuration {
     public static final String PARAM_FAVICON_NAME = "favicon.png";
     
 	// additional parameters required to due imperfect text box detection routine
-	public static final int TEXTBOX_X_OFFSET = 0; // 4 for SCG website
-	public static final int TEXTBOX_WIDTH_OFFSET = 0; // 20 for QRS login website, 15 for QRS login website
-	public static final int TEXTBOX_HEIGHT_OFFSET = 0; // -4 for SCG website / -6 for easy chair
+	public static final int TEXTBOX_X_OFFSET = -2; // 1 for QRS / 4 for SCG website / -2 microsoft online
+	public static final int TEXTBOX_Y_OFFSET = -2; // 1 for QRS / 4 for SCG website / -2 microsoft online
+	public static final int TEXTBOX_WIDTH_OFFSET = 0; // 20/22 for QRS login website, 18 for QRS login website
+	public static final int TEXTBOX_HEIGHT_OFFSET = -6; // -4 for SCG website / -6 for easy chair / -6 microsoft online
 	
 }

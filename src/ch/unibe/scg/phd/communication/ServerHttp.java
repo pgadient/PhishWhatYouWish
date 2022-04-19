@@ -4,6 +4,8 @@ import org.glassfish.grizzly.http.server.ErrorPageGenerator;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.Request;
+import org.glassfish.grizzly.ssl.SSLContextConfigurator;
+import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +17,22 @@ public class ServerHttp {
 	private static Logger _LOG = LoggerFactory.getLogger(ServerHttp.class);
 //	private static volatile boolean _finishSpinner = true;
     
-	public static void start() {
+	public static void start(boolean useHTTPS) {
 		// https://javaee.github.io/grizzly/httpserverframework.html
-		HttpServer server = HttpServer.createSimpleServer(FileUtil.getFullyQualifiedHttpServerRoot(), 8080);
+		
+		HttpServer server;
+		if (useHTTPS) {
+			server = HttpServer.createSimpleServer(FileUtil.getFullyQualifiedHttpServerRoot(), 443);	
+		} else {
+			server = HttpServer.createSimpleServer(FileUtil.getFullyQualifiedHttpServerRoot(), 80);	
+		}
 		for (NetworkListener each : server.getListeners()) {
 			// disable static resource caching to allow HTML file changes while server is running
 			_LOG.info("Static HTTP listener found: " + each.getName());
+			if (useHTTPS) {
+				each.setSSLEngineConfig(initializeSSL());
+				each.setSecure(true);	
+			}
 			each.getFileCache().setEnabled(false);
 			each.setDefaultErrorPageGenerator(new ErrorPageGenerator() {
 				@Override
@@ -69,4 +81,15 @@ public class ServerHttp {
 //	public static void disableSpinner() {
 //		_finishSpinner = false;
 //	}
+	
+	
+	 private static SSLEngineConfigurator initializeSSL() {
+	        SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
+            sslContextConfig.setTrustStoreFile(FileUtil.identifyCertsFile("ROOT"));
+            sslContextConfig.setTrustStorePass(Configuration.KEYSTORE_DEFAULT_PASSWORD);
+            sslContextConfig.setKeyStoreFile(FileUtil.identifyKeystoreFile("ROOT"));
+            sslContextConfig.setKeyStorePass(Configuration.KEYSTORE_DEFAULT_PASSWORD);
+
+	        return new SSLEngineConfigurator(sslContextConfig.createSSLContext(true), false, false, false);
+	    }
 }

