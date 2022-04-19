@@ -4,7 +4,7 @@ Full support is available for all major web browsers and partial support for mos
 
 The Proof-of-Concept relies on Java, Selenium, Firefox, and HTML5.
 
-> This is the accompanying material for the publication titled “Phish What You Wish” that has been presented at the 21st IEEE International Conference on Software Quality, Reliability, and Security (QRS 2021).
+> This is the accompanying material for the publication titled “Phish What You Wish” that has been presented at the 21st IEEE International Conference on Software Quality, Reliability, and Security (QRS 2021). The preprint can be downloaded [here](https://arxiv.org/pdf/2111.03596) and the presentation is available [here](https://www.youtube.com/watch?v=XEWyGN_P_pw).
 
 ## Phishing server
 The server application has a fallback to the default configuration when no start-up parameters are provided.
