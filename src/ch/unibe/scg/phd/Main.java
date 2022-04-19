@@ -22,7 +22,6 @@ public class Main {
 	private static boolean _FEATURE_DEBUG_OUTPUT = true;
 	private static boolean _FEATURE_ENABLE_ADBLOCK = true;
 	private static boolean _FEATURE_HEADLESS = false;
-//	private static String _PARAM_DEFAULT_BASE_URL = "https://www.softconf.com/utdn/qrs2021-Regular-Paper/";
 	private static String _PARAM_ORIGINAL_URL = "https://www.paypal.com/ch/signin";
 	private static String _PARAM_SPOOFED_URL = "https://www.myphishingsite.com";
 	private static String _PARAM_SPOOFED_HOST;
